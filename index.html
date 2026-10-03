@@ -1,0 +1,2127 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1024">
+  <meta name="description" content="给雷俐娜的生日祝福">
+  <title>给雷俐娜的生日祝福</title>
+  <style>
+    :root {
+      --night: #0b1024;
+      --night-deep: #070a18;
+      --ink: #f8f6ff;
+      --muted: #c7c9dc;
+      --pink: #ff7aa8;
+      --gold: #ffd166;
+      --line: rgba(255, 255, 255, .2);
+      --shadow: 0 24px 70px rgba(0, 0, 0, .35);
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--night-deep); }
+    body {
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { border: 0; }
+    button:focus-visible, input:focus-visible { outline: 3px solid rgba(255, 209, 102, .8); outline-offset: 3px; }
+    .app { position: fixed; inset: 0; overflow: hidden; background: var(--night-deep); }
+    .screen {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      visibility: hidden; opacity: 0; pointer-events: none;
+      transition: opacity .65s ease, visibility .65s ease;
+    }
+    .screen.active { visibility: visible; opacity: 1; pointer-events: auto; }
+    .login-screen {
+      background:
+        radial-gradient(circle at 16% 18%, rgba(255, 122, 168, .22), transparent 28%),
+        radial-gradient(circle at 86% 78%, rgba(134, 227, 206, .15), transparent 26%),
+        linear-gradient(145deg, #121936 0%, #241535 52%, #0b1024 100%);
+    }
+    .login-screen::before {
+      position: absolute; inset: 0; content: ""; opacity: .7; pointer-events: none;
+      background-image:
+        radial-gradient(circle at 12% 30%, rgba(255, 255, 255, .75) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 82% 22%, rgba(255, 255, 255, .8) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 68% 72%, rgba(255, 255, 255, .55) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 29% 82%, rgba(255, 255, 255, .45) 0 1px, transparent 1.5px);
+      background-size: 170px 170px, 230px 230px, 190px 190px, 280px 280px;
+      animation: drift 18s linear infinite;
+    }
+    .login-panel {
+      position: relative; z-index: 1; width: min(90vw, 420px);
+      padding: clamp(28px, 7vw, 48px); border: 1px solid var(--line); border-radius: 8px;
+      background: rgba(11, 16, 36, .76); box-shadow: var(--shadow); backdrop-filter: blur(18px);
+    }
+    .eyebrow { margin: 0 0 12px; color: var(--gold); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+    .login-panel h1 { margin: 0; font-size: clamp(30px, 8vw, 46px); line-height: 1.15; }
+    .intro { margin: 14px 0 28px; color: var(--muted); font-size: 15px; line-height: 1.8; }
+    .field { display: block; margin-top: 16px; color: var(--muted); font-size: 13px; }
+    .field input {
+      display: block; width: 100%; height: 48px; margin-top: 8px; padding: 0 14px;
+      border: 1px solid rgba(255, 255, 255, .2); border-radius: 6px; color: var(--ink);
+      background: rgba(255, 255, 255, .08); transition: border-color .2s ease, background .2s ease;
+    }
+    .field input:hover, .field input:focus { border-color: rgba(255, 209, 102, .75); background: rgba(255, 255, 255, .13); }
+    .primary-button, .secondary-button {
+      min-height: 46px; padding: 0 22px; border-radius: 6px; cursor: pointer;
+      transition: transform .2s ease, background .2s ease, color .2s ease;
+    }
+    .primary-button { width: 100%; margin-top: 24px; color: #2b1820; background: var(--gold); font-weight: 700; }
+    .primary-button:hover, .secondary-button:hover { transform: translateY(-2px); }
+    .primary-button:hover { background: #ffe08a; }
+    .form-message { min-height: 22px; margin: 12px 0 0; color: #ffb4c8; font-size: 13px; line-height: 1.6; }
+    .scene { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--night); }
+    .scene-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .scene-topline {
+      position: absolute; z-index: 2; top: max(24px, env(safe-area-inset-top)); left: 50%;
+      width: min(88vw, 720px); transform: translateX(-50%); text-align: center;
+    }
+    .scene-topline p { margin: 0; color: rgba(255, 255, 255, .7); font-size: 13px; letter-spacing: .08em; }
+    .particle-screen .scene { background: linear-gradient(180deg, rgba(10, 14, 38, .4), rgba(10, 14, 38, .8)), #121938; }
+    .particle-screen .scene::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255, 209, 102, .15) 0 2px, transparent 4px),
+        radial-gradient(circle at 80% 20%, rgba(255, 159, 214, .15) 0 2px, transparent 4px),
+        radial-gradient(circle at 60% 70%, rgba(102, 217, 255, .15) 0 2px, transparent 4px),
+        radial-gradient(circle at 30% 80%, rgba(255, 209, 102, .12) 0 3px, transparent 5px),
+        radial-gradient(circle at 85% 60%, rgba(180, 165, 255, .12) 0 2px, transparent 4px),
+        radial-gradient(circle at 10% 50%, rgba(255, 255, 255, .1) 0 1px, transparent 3px);
+      background-size: 300px 300px, 250px 250px, 350px 350px, 280px 280px, 200px 200px, 400px 400px;
+      animation: drift 20s linear infinite;
+    }
+    .particle-screen .scene::before, .cake-screen .scene::before {
+      position: absolute; inset: 0; content: ""; opacity: .32; pointer-events: none;
+      background-image:
+        radial-gradient(circle at 12% 20%, #fff 0 1px, transparent 1.5px),
+        radial-gradient(circle at 86% 16%, #fff 0 1px, transparent 1.5px),
+        radial-gradient(circle at 72% 80%, #fff 0 1px, transparent 1.5px),
+        radial-gradient(circle at 24% 72%, #fff 0 1px, transparent 1.5px);
+      background-size: 190px 190px, 240px 240px, 170px 170px, 260px 260px;
+    }
+    .particle-copy {
+      position: absolute; z-index: 3; top: 75%; left: 50%; width: min(88vw, 680px);
+      transform: translateX(-50%); text-align: center; pointer-events: none;
+    }
+    .particle-copy h2 { margin: 0; font-size: clamp(32px, 8vw, 64px); line-height: 1.1; text-shadow: 0 8px 40px rgba(255, 209, 102, .5), 0 0 80px rgba(255, 122, 168, .4); font-weight: 700; }
+    .particle-copy p { margin: 20px 0 0; color: rgba(255, 255, 255, .68); font-size: 14px; line-height: 1.6; position: relative; z-index: 2; }
+    .scene-actions {
+      position: absolute; z-index: 3; right: 0; bottom: max(26px, env(safe-area-inset-bottom)); left: 0;
+      display: flex; justify-content: center; gap: 10px; padding: 0 18px;
+    }
+    .secondary-button {
+      color: var(--ink); background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .24);
+      backdrop-filter: blur(12px);
+    }
+    .secondary-button:hover { background: rgba(255, 255, 255, .2); }
+    .secondary-button.accent { color: #2b1820; background: var(--gold); border-color: transparent; }
+    .secondary-button.accent:hover { background: #ffe08a; }
+    .music-button {
+      position: absolute; z-index: 4; top: max(22px, env(safe-area-inset-top)); right: 18px;
+      display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, .2); border-radius: 999px; color: rgba(255, 255, 255, .86);
+      background: rgba(8, 12, 32, .45); cursor: pointer; font-size: 12px; backdrop-filter: blur(12px);
+    }
+    .music-button:hover { background: rgba(255, 255, 255, .16); }
+    .cake-screen .scene {
+      display: grid; place-items: center;
+      background: #000;
+    }
+    .wish-text {
+      position: absolute; top: max(50px, env(safe-area-inset-top) + 40px); left: 0; right: 0;
+      text-align: center; z-index: 3; pointer-events: none;
+    }
+    .wish-text p {
+      margin: 0; font-size: clamp(20px, 5vw, 32px);
+      letter-spacing: 8px; font-weight: 600;
+      background: linear-gradient(135deg, #fff8e1 0%, #ffd166 30%, #ff9ec7 60%, #c8a8ff 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 20px rgba(255, 209, 102, .6));
+      animation: wishGlow 3s ease-in-out infinite, wishFloat 4s ease-in-out infinite;
+    }
+    @keyframes wishGlow {
+      0%, 100% { background-position: 0% 50%; filter: drop-shadow(0 0 15px rgba(255, 209, 102, .5)); }
+      50% { background-position: 100% 50%; filter: drop-shadow(0 0 30px rgba(255, 158, 199, .8)); }
+    }
+    @keyframes wishFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .cake-photo {
+      position: absolute; top: 50%; left: 50%; z-index: 1;
+      width: min(85vw, 680px); max-height: 80vh; height: auto;
+      pointer-events: none;
+      transform: translate(-50%, -52%) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transform-style: preserve-3d;
+      animation: cake3dFloat 6s ease-in-out infinite;
+      filter: drop-shadow(0 20px 40px rgba(100, 140, 255, .3));
+      -webkit-mask-image: radial-gradient(ellipse 74% 74% at 50% 50%, #000 42%, rgba(0, 0, 0, .6) 68%, transparent 95%);
+      mask-image: radial-gradient(ellipse 74% 74% at 50% 50%, #000 42%, rgba(0, 0, 0, .6) 68%, transparent 95%);
+    }
+    .cake-video {
+      object-fit: contain;
+      background: transparent;
+      /* 黑底视频融入深色背景：黑色像素不再显示，矩形边框随之消失 */
+      mix-blend-mode: screen;
+    }
+    @keyframes cake3dFloat {
+      0%, 100% { transform: translate(-50%, -52%) translateY(0) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); }
+      50% { transform: translate(-50%, -52%) translateY(-15px) rotateX(calc(var(--tilt-x, 0deg) + 3deg)) rotateY(calc(var(--tilt-y, 0deg) + 2deg)); }
+    }
+    .cake-hero-canvas {
+      position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .cake-copy {
+      position: absolute; z-index: 2; top: max(34px, env(safe-area-inset-top)); left: 50%;
+      width: min(90vw, 680px); transform: translateX(-50%); text-align: center;
+    }
+    .cake-copy h2, .firework-copy h2 {
+      margin: 0; color: #fff7e5; font-size: clamp(28px, 7vw, 54px); line-height: 1.18;
+      text-shadow: 0 8px 30px rgba(0, 0, 0, .32);
+    }
+    .cake-copy p, .firework-copy p { margin: 12px 0 0; color: rgba(255, 255, 255, .74); font-size: 15px; line-height: 1.7; }
+    .cake-stars { display: none; }
+    .cake-nebula {
+      position: absolute; inset: -18%; z-index: 0; pointer-events: none; opacity: .8;
+      background:
+        radial-gradient(ellipse at 52% 55%, rgba(57, 112, 255, .24), transparent 28%),
+        radial-gradient(ellipse at 25% 42%, rgba(164, 73, 255, .13), transparent 24%),
+        radial-gradient(ellipse at 77% 28%, rgba(53, 218, 255, .12), transparent 20%);
+      filter: blur(20px) saturate(135%);
+      animation: nebulaDrift 11s ease-in-out infinite alternate;
+      display: none;
+    }
+    .cake-wrap {
+      position: relative; z-index: 1; width: min(84vw, 430px); height: 360px; margin-top: 48px;
+      perspective: 900px; transform-style: preserve-3d;
+      display: none;
+    }
+    .cake-scene {
+      position: absolute; inset: 0; transform-style: preserve-3d; animation: cakeFloat 5s ease-in-out infinite;
+      --tilt-x: 0deg; --tilt-y: 0deg;
+    }
+    .cake-glow {
+      position: absolute; right: 14%; bottom: 20px; left: 14%; height: 130px; border-radius: 50%;
+      background: rgba(64, 137, 255, .38); filter: blur(28px); transform: translateZ(-80px); animation: glowPulse 2.8s ease-in-out infinite;
+    }
+    .plate {
+      position: absolute; right: 6%; bottom: 30px; left: 6%; height: 48px; border-radius: 50%;
+      background: radial-gradient(ellipse at center, #f8fbff 0 34%, #7f9bd7 36% 47%, #263d83 50% 64%, #a5c2ff 66% 71%, transparent 73%);
+      box-shadow: 0 18px 32px rgba(0, 0, 0, .35), 0 0 26px rgba(122, 178, 255, .35); transform: rotateX(65deg) translateZ(-10px);
+    }
+    .plate::after {
+      position: absolute; content: ""; right: 20%; bottom: -35px; left: 20%; height: 54px;
+      border-radius: 50%; background: rgba(48, 102, 231, .28); filter: blur(16px);
+    }
+    .orbit {
+      position: absolute; left: 50%; top: 51%; width: 390px; height: 116px; border: 3px solid rgba(174, 210, 255, .72);
+      border-radius: 50%; box-shadow: 0 0 9px rgba(127, 183, 255, .95), inset 0 0 8px rgba(255, 255, 255, .48);
+      transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-18deg) translateZ(85px); animation: orbitSpin 9s linear infinite;
+    }
+    .orbit::before, .orbit::after { position: absolute; content: ""; border-radius: 50%; background: #ffd166; box-shadow: 0 0 14px 4px rgba(255, 209, 102, .75); }
+    .orbit::before { top: 8px; left: 44px; width: 11px; height: 11px; }
+    .orbit::after { right: 30px; bottom: 2px; width: 8px; height: 8px; background: #86e3ce; box-shadow: 0 0 14px 4px rgba(134, 227, 206, .75); }
+    .orbit-back {
+      position: absolute; left: 50%; top: 51%; width: 340px; height: 96px; border: 2px solid rgba(255, 198, 119, .62);
+      border-radius: 50%; transform: translate(-50%, -50%) rotateX(68deg) rotateZ(26deg) translateZ(-70px); animation: orbitSpinReverse 12s linear infinite;
+    }
+    .orbit-mid {
+      position: absolute; left: 50%; top: 50%; width: 300px; height: 180px;
+      border: 1px solid rgba(115, 237, 255, .45); border-radius: 50%;
+      box-shadow: 0 0 14px rgba(84, 216, 255, .5);
+      transform: translate(-50%, -50%) rotateX(70deg) rotateZ(72deg) translateZ(38px);
+      animation: orbitMid 15s linear infinite;
+    }
+    .orbit-mid::before {
+      position: absolute; content: ""; top: 20px; right: 36px; width: 13px; height: 13px;
+      border-radius: 50%; background: #80e8ff; box-shadow: 0 0 17px 5px rgba(91, 221, 255, .85);
+    }
+    .satellite {
+      position: absolute; z-index: 4; width: 23px; height: 23px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #fff 0 7%, #9b7cff 20%, #3154c7 58%, #10174c 100%);
+      box-shadow: 0 0 18px 5px rgba(123, 121, 255, .55);
+      transform-style: preserve-3d; animation: satelliteFloat 6s ease-in-out infinite;
+    }
+    .satellite::after {
+      position: absolute; content: ""; top: 9px; left: 18px; width: 40px; height: 3px;
+      border-radius: 50%; background: #f6c8ff; box-shadow: 0 0 9px rgba(246, 200, 255, .8);
+      transform: rotate(-25deg);
+    }
+    .satellite.one { top: 18%; right: 8%; animation-delay: -.7s; }
+    .satellite.two { bottom: 28%; left: 3%; width: 15px; height: 15px; animation-delay: -2.4s; }
+    .satellite.two::after { left: 11px; width: 28px; height: 2px; }
+    .cake {
+      position: absolute; right: 16%; bottom: 72px; left: 16%; height: 205px; transform-style: preserve-3d;
+      transform: rotateX(calc(5deg + var(--tilt-y))) rotateY(calc(-8deg + var(--tilt-x))) translateZ(28px);
+    }
+    .cake-side-glow {
+      position: absolute; z-index: 3; right: 18%; bottom: 91px; left: 18%; height: 145px;
+      border-radius: 50%; border: 1px solid rgba(127, 221, 255, .35);
+      background: linear-gradient(90deg, transparent, rgba(115, 225, 255, .18), transparent);
+      filter: blur(2px); transform: translateZ(36px); pointer-events: none;
+      animation: sideLight 3.6s ease-in-out infinite;
+    }
+    .cake-layer {
+      position: absolute; right: 0; left: 0; overflow: hidden; border-radius: 18px 18px 26px 26px;
+      transform-style: preserve-3d; box-shadow: inset 0 -14px 0 rgba(4, 20, 77, .38), 0 16px 24px rgba(0, 0, 0, .28);
+    }
+    .cake-layer::before {
+      position: absolute; content: ""; inset: 0;
+      background: radial-gradient(circle at 20% 24%, rgba(255,255,255,.8) 0 2px, transparent 3px),
+        radial-gradient(circle at 70% 40%, rgba(255,255,255,.55) 0 1px, transparent 2px),
+        radial-gradient(circle at 46% 72%, rgba(255, 209, 102, .92) 0 2px, transparent 3px),
+        linear-gradient(115deg, rgba(255,255,255,.28), transparent 36%, rgba(0,0,0,.22) 76%);
+      background-size: 54px 48px, 74px 60px, 63px 57px, auto; mix-blend-mode: screen; opacity: .85;
+    }
+    .cake-layer.bottom { bottom: 0; height: 86px; background: linear-gradient(100deg, #112a87, #244dce 46%, #08144f); }
+    .cake-layer.middle { right: 5%; bottom: 70px; left: 5%; height: 74px; background: linear-gradient(100deg, #193aa0, #376ee6 45%, #102267); }
+    .cake-layer.top { right: 13%; bottom: 132px; left: 13%; height: 62px; background: linear-gradient(100deg, #6e9cff, #eff8ff 45%, #5b79da); box-shadow: inset 0 -10px 0 rgba(63, 73, 162, .26), 0 12px 18px rgba(0, 0, 0, .2); }
+    .cream {
+      position: absolute; right: 10%; bottom: 126px; left: 10%; height: 25px; border-radius: 50%;
+      background: radial-gradient(ellipse at center, #ffffff 0 44%, #b4d3ff 49% 67%, transparent 70%); filter: drop-shadow(0 0 8px rgba(199, 229, 255, .9));
+    }
+    .berry {
+      position: absolute; z-index: 2; width: 16px; height: 16px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #fff5cc 0 7%, #ffcf5d 12% 32%, #ff6f82 34% 67%, #bb2f6c 72%);
+      box-shadow: 0 0 12px rgba(255, 116, 143, .7);
+    }
+    .berry.one { right: 22%; bottom: 158px; } .berry.two { right: 49%; bottom: 148px; } .berry.three { left: 22%; bottom: 158px; }
+    .candle {
+      position: absolute; bottom: 157px; left: 50%; width: 18px; height: 54px; transform: translateX(-50%);
+      border-radius: 6px 6px 3px 3px; background: repeating-linear-gradient(135deg, #b8d7ff 0 7px, #fff5d6 7px 13px);
+      box-shadow: 0 5px 9px rgba(0, 0, 0, .15), 0 0 12px rgba(127, 183, 255, .6);
+    }
+    .flame {
+      position: absolute; bottom: 205px; left: 50%; width: 22px; height: 31px; transform: translateX(-50%);
+      border-radius: 60% 40% 60% 40%; background: radial-gradient(circle at 50% 70%, #fff6bd 0 18%, #ffd166 42%, #ff6b61 76%);
+      box-shadow: 0 0 22px 8px rgba(255, 209, 102, .45), 0 0 44px 10px rgba(255, 111, 97, .25);
+      animation: flicker .85s ease-in-out infinite alternate;
+    }
+    .star-chip { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #fff6bf; box-shadow: 0 0 10px 3px rgba(255, 217, 115, .9); animation: starBlink 1.6s ease-in-out infinite alternate; }
+    .star-chip.one { top: 28%; left: 10%; } .star-chip.two { top: 18%; right: 15%; animation-delay: .5s; }
+    .star-chip.three { right: 7%; bottom: 28%; animation-delay: .9s; } .star-chip.four { bottom: 24%; left: 8%; animation-delay: 1.2s; }
+    .star-trail {
+      position: absolute; z-index: 2; width: 92px; height: 2px; border-radius: 50%;
+      background: linear-gradient(90deg, transparent, rgba(255, 244, 192, .95), transparent);
+      box-shadow: 0 0 8px rgba(255, 235, 166, .9); transform: rotate(-24deg);
+      animation: trailFly 5s ease-in-out infinite;
+    }
+    .star-trail.one { top: 22%; left: 2%; }
+    .star-trail.two { right: 2%; bottom: 36%; width: 66px; transform: rotate(25deg); animation-delay: 2.2s; }
+    .cake-message {
+      position: absolute; z-index: 2; right: 0; bottom: max(92px, calc(env(safe-area-inset-bottom) + 80px)); left: 0;
+      padding: 0 18px; color: rgba(255, 255, 255, .78); text-align: center; font-size: 14px;
+    }
+    .cake-screen .scene::before, .cake-screen .cake-copy, .cake-screen .cake-message { display: none; }
+    .firework-screen .scene { background: #060918; }
+    .album-screen .scene { background: radial-gradient(circle at 50% 30%, #2a1b5e, #070a18 70%); overflow: hidden; }
+    .album-screen .scene::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 25%, rgba(255, 159, 214, .2) 0 2px, transparent 4px),
+        radial-gradient(circle at 85% 20%, rgba(255, 209, 102, .2) 0 3px, transparent 5px),
+        radial-gradient(circle at 70% 75%, rgba(134, 227, 206, .15) 0 2px, transparent 4px),
+        radial-gradient(circle at 25% 80%, rgba(180, 165, 255, .18) 0 3px, transparent 5px);
+      background-size: 350px 350px, 280px 280px, 320px 320px, 260px 260px;
+      animation: drift 25s linear infinite;
+    }
+    .album-screen .scene::after {
+      content: ""; position: absolute; inset: -20%; pointer-events: none;
+      background: conic-gradient(from 0deg, transparent 0deg, rgba(255, 182, 219, .06) 60deg, transparent 120deg, rgba(180, 165, 255, .06) 240deg, transparent 300deg);
+      animation: rotateSlow 30s linear infinite;
+    }
+    @keyframes rotateSlow { to { transform: rotate(360deg); } }
+    .album-stage {
+      position: absolute; inset: 0; display: grid; place-items: center; perspective: 1500px; z-index: 2;
+    }
+    .album-control {
+      position: absolute; top: 50%; z-index: 6;
+      width: 46px; height: 46px; padding: 0;
+      border: 1px solid rgba(255, 255, 255, .28); border-radius: 50%;
+      color: rgba(255, 255, 255, .94); background: rgba(11, 15, 42, .48);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .18);
+      backdrop-filter: blur(16px); cursor: pointer;
+      font-family: Georgia, serif; font-size: 30px; line-height: 1;
+      transform: translateY(-50%); transition: transform .25s ease, background .25s ease, border-color .25s ease;
+    }
+    .album-control:hover { background: rgba(255, 182, 219, .22); border-color: rgba(255, 255, 255, .55); }
+    .album-control:active { transform: translateY(-50%) scale(.92); }
+    .album-control.prev { left: max(18px, 5vw); }
+    .album-control.next { right: max(18px, 5vw); }
+    .album-card {
+      position: relative; width: min(80vw, 400px); height: min(70vh, 540px);
+      border-radius: 24px; overflow: hidden;
+      box-shadow:
+        0 40px 100px rgba(180, 100, 255, .4),
+        0 0 0 1px rgba(255,255,255,.15),
+        inset 0 1px 0 rgba(255,255,255,.2);
+      transition: transform 1s cubic-bezier(.2, .8, .2, 1), opacity .8s ease, box-shadow 1s ease;
+      transform-style: preserve-3d;
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(20px);
+    }
+    .album-card::before {
+      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 40%, transparent 60%, rgba(255,255,255,.1) 100%);
+    }
+    .album-card img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform 6s ease;
+    }
+    .album-card.active img { transform: scale(1.05); }
+    .album-card.enter { transform: rotateY(-25deg) translateZ(-100px) scale(.85); opacity: 0; }
+    .album-card.active { transform: rotateY(0) translateZ(0) scale(1); opacity: 1; }
+    .album-card.exit { transform: rotateY(25deg) translateZ(-100px) scale(.85); opacity: 0; }
+    .album-dots {
+      position: absolute; bottom: max(100px, env(safe-area-inset-bottom) + 90px); left: 0; right: 0;
+      display: flex; justify-content: center; gap: 12px; z-index: 5;
+    }
+    .album-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.3);
+      cursor: pointer; transition: all .4s ease; border: 0;
+      backdrop-filter: blur(10px);
+    }
+    .album-dot.active { background: #ffb6d9; width: 28px; border-radius: 4px; box-shadow: 0 0 15px rgba(255, 182, 217, .8); }
+    .album-title {
+      position: absolute; top: max(40px, env(safe-area-inset-top) + 30px); left: 0; right: 0;
+      text-align: center; z-index: 5;
+    }
+    .album-title h2 {
+      margin: 0; color: #fff; font-size: clamp(26px, 6vw, 40px); font-weight: 300; letter-spacing: 4px;
+      text-shadow: 0 0 40px rgba(255, 182, 219, .6);
+    }
+    .album-title::after {
+      content: ""; display: block; width: 60px; height: 1px; margin: 12px auto 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+    }
+    .album-actions { position: absolute; bottom: max(30px, env(safe-area-inset-bottom) + 24px); left: 0; right: 0; display: flex; justify-content: center; z-index: 5; }
+    .wallpaper-screen { background: #000; }
+    .wallpaper-intro {
+      position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px; padding: 0 24px;
+      text-align: center; background: #000; transition: opacity .45s ease;
+    }
+    .wallpaper-intro.fade { opacity: 0; pointer-events: none; }
+    .wallpaper-eyebrow { margin: 0; color: rgba(255,255,255,.42); font-size: 12px; letter-spacing: .3em; }
+    .wallpaper-intro h2 { margin: 0; color: #fff; font-size: clamp(26px, 5.4vw, 52px); letter-spacing: 2px; text-shadow: 0 0 34px rgba(255, 182, 219, .32); }
+    .wallpaper-intro h2 .sparkle { color: var(--gold); }
+    .wallpaper-sub { margin: 0; color: rgba(255,255,255,.66); font-size: clamp(13px, 2.2vw, 16px); line-height: 2; }
+    .wallpaper-sub b { color: var(--gold); font-weight: 600; }
+    .wallpaper-intro .secondary-button { margin-top: 10px; }
+    .wallpaper-viewer { position: absolute; inset: 0; z-index: 2; opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+    .wallpaper-viewer.show { opacity: 1; pointer-events: auto; cursor: pointer; }
+    .wallpaper-stage { position: absolute; inset: 0; }
+    .wallpaper-stage img {
+      position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; object-fit: contain;
+      transform: translate(-50%, -50%); opacity: 0; transition: opacity .5s ease;
+    }
+    .wallpaper-stage img.on { opacity: 1; }
+    /* 电脑端（横屏）：黑底壁纸旋转 90° 铺满；手机端 portrait-mode 下恢复竖版正常显示 */
+    .wallpaper-screen:not(.portrait-mode) .wallpaper-stage img.rot {
+      width: var(--wv-h, 100%); height: var(--wv-w, 100%); transform: translate(-50%, -50%) rotate(-90deg);
+    }
+    .wallpaper-count, .wallpaper-full, .wallpaper-exit {
+      position: absolute; z-index: 4; padding: 6px 14px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px;
+      background: rgba(0, 0, 0, .42); color: rgba(255, 255, 255, .62); font-size: 12px; backdrop-filter: blur(8px);
+      transition: background .2s ease, color .2s ease;
+    }
+    .wallpaper-count { top: max(18px, env(safe-area-inset-top)); left: 18px; }
+    .wallpaper-full { top: max(18px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); cursor: pointer; }
+    .wallpaper-exit { top: max(18px, env(safe-area-inset-top)); right: 18px; cursor: pointer; }
+    .wallpaper-full:hover, .wallpaper-exit:hover { background: rgba(255, 255, 255, .18); color: #fff; }
+    .wallpaper-dots {
+      position: absolute; z-index: 4; bottom: max(26px, calc(env(safe-area-inset-bottom) + 20px)); left: 50%;
+      transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 7px; max-width: calc(100% - 44px);
+    }
+    .wallpaper-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.24); transition: all .3s ease; }
+    .wallpaper-dots i.on { background: var(--gold); transform: scale(1.35); box-shadow: 0 0 8px rgba(255, 209, 102, .8); }
+    .wallpaper-tip {
+      position: absolute; z-index: 4; bottom: max(54px, calc(env(safe-area-inset-bottom) + 46px)); left: 0; right: 0; margin: 0;
+      color: rgba(255, 255, 255, .45); font-size: 12px; text-align: center; pointer-events: none;
+      animation: wallpaperTipFade 4.5s ease forwards;
+    }
+    @keyframes wallpaperTipFade { 0%, 62% { opacity: 1; } 100% { opacity: 0; } }
+    .firework-copy {
+      position: absolute; z-index: 2; top: 18%; left: 50%; width: min(92vw, 740px);
+      transform: translateX(-50%); text-align: center; pointer-events: none;
+    }
+    .firework-copy h2 { color: #fff; font-size: clamp(32px, 8vw, 68px); }
+    .firework-copy p { color: rgba(255, 255, 255, .72); }
+    .toast {
+      position: fixed; z-index: 20; right: 50%; bottom: max(24px, env(safe-area-inset-bottom));
+      min-width: 170px; max-width: calc(100vw - 36px); padding: 11px 16px; transform: translate(50%, 24px);
+      border: 1px solid rgba(255, 255, 255, .16); border-radius: 6px; color: #fff; background: rgba(8, 12, 32, .86);
+      box-shadow: var(--shadow); opacity: 0; pointer-events: none; text-align: center; font-size: 13px;
+      transition: opacity .25s ease, transform .25s ease; backdrop-filter: blur(12px);
+    }
+    .toast.show { opacity: 1; transform: translate(50%, 0); }
+    @keyframes drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(18px, 12px, 0); } }
+    @keyframes flicker { from { transform: translateX(-50%) scale(.94) rotate(-3deg); } to { transform: translateX(-50%) scale(1.08) rotate(4deg); } }
+    @keyframes cakeFloat { 0%, 100% { transform: translateY(5px) rotateX(0deg) rotateY(-1deg); } 50% { transform: translateY(-9px) rotateX(2deg) rotateY(2deg); } }
+    @keyframes glowPulse { 0%, 100% { opacity: .6; transform: translateZ(-80px) scale(.88); } 50% { opacity: 1; transform: translateZ(-80px) scale(1.08); } }
+    @keyframes orbitSpin { from { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-18deg) rotate(0deg) translateZ(85px); } to { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-18deg) rotate(360deg) translateZ(85px); } }
+    @keyframes orbitSpinReverse { from { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(26deg) rotate(360deg) translateZ(-70px); } to { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(26deg) rotate(0deg) translateZ(-70px); } }
+    @keyframes starBlink { from { opacity: .25; transform: scale(.65); } to { opacity: 1; transform: scale(1.3); } }
+    @keyframes nebulaDrift { from { transform: translate3d(-2%, 1%, 0) scale(1); } to { transform: translate3d(2%, -2%, 0) scale(1.08); } }
+    @keyframes orbitMid { from { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(72deg) rotate(0deg) translateZ(38px); } to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(72deg) rotate(-360deg) translateZ(38px); } }
+    @keyframes satelliteFloat { 0%, 100% { transform: translate3d(0, 0, 40px) scale(.9); } 50% { transform: translate3d(-12px, 14px, 90px) scale(1.08); } }
+    @keyframes sideLight { 0%, 100% { opacity: .15; transform: translateZ(36px) scale(.82); } 50% { opacity: .75; transform: translateZ(36px) scale(1.08); } }
+    @keyframes trailFly { 0%, 100% { opacity: 0; transform: translate3d(-12px, 8px, 0) rotate(-24deg); } 35%, 70% { opacity: .9; } 50% { transform: translate3d(28px, -12px, 0) rotate(-24deg); } }
+    @media (max-width: 640px) {
+      .login-panel { padding: 28px 22px; }
+      .scene-actions { flex-wrap: wrap; }
+      .scene-actions .secondary-button { flex: 1 1 auto; min-width: 132px; }
+      .music-button { top: max(18px, env(safe-area-inset-top)); right: 12px; }
+      .scene-topline { top: max(18px, env(safe-area-inset-top)); padding-right: 100px; text-align: left; }
+      .particle-copy { top: 22%; }
+      .cake-copy { top: max(28px, env(safe-area-inset-top)); width: calc(100% - 24px); padding: 0 4px; }
+      .cake-copy h2 { white-space: nowrap; font-size: clamp(25px, 7.2vw, 32px); }
+      .cake-copy p { max-width: 350px; margin: 8px auto 0; font-size: 12px; line-height: 1.45; }
+      .cake-wrap { width: min(96vw, 430px); margin-top: 58px; transform: scale(.82); }
+      .cake-message { bottom: max(148px, calc(env(safe-area-inset-bottom) + 132px)); }
+      .firework-copy { top: 24%; padding: 0 10px; }
+      .scene-actions { gap: 10px; }
+      .wallpaper-dots i { width: 5px; height: 5px; }
+      .wallpaper-dots { gap: 6px; }
+      .wallpaper-count, .wallpaper-full, .wallpaper-exit { font-size: 11px; padding: 5px 11px; }
+      .wallpaper-full { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="screen login-screen active" id="loginScreen" aria-label="登录">
+      <div class="login-panel">
+        <p class="eyebrow">A little birthday page</p>
+        <h1>给雷俐娜的祝福</h1>
+        <p class="intro">输入专属账号和密码，打开这一份只属于你的生日惊喜。</p>
+        <form id="loginForm" novalidate>
+          <label class="field">账号<input id="accountInput" type="text" value="雷俐娜" autocomplete="off" required></label>
+          <label class="field">密码<input id="passwordInput" type="password" inputmode="numeric" autocomplete="off" required></label>
+          <button class="primary-button" type="submit">进入祝福</button>
+          <p class="form-message" id="formMessage" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+    <section class="screen particle-screen" id="particleScreen" aria-label="粒子祝福">
+      <div class="scene">
+        <canvas class="scene-canvas" id="particleCanvas"></canvas>
+        <div class="scene-topline"><p>For Leilina</p></div>
+        <div class="particle-copy"><h2 id="particleHeading">生日快乐</h2><p id="particleCaption">把这一页送给你</p></div>
+        <button class="music-button" type="button" aria-label="播放或暂停音乐"><span>♫</span><span>音乐</span></button>
+        <div class="scene-actions" style="display:none"><button class="secondary-button accent" id="toCakeButton" type="button">看蛋糕</button></div>
+      </div>
+    </section>
+    <section class="screen cake-screen" id="cakeScreen" aria-label="生日蛋糕">
+      <div class="scene">
+        <div class="wish-text"><p>许个愿望吧</p></div>
+        <button class="music-button" type="button" aria-label="播放或暂停音乐"><span>♫</span><span>音乐</span></button>
+        <canvas class="cake-stars" id="cakeStarsCanvas" aria-hidden="true"></canvas>
+        <video class="cake-photo cake-video" id="cakeVideo" autoplay loop muted playsinline webkit-playsinline preload="auto" poster="img/cake-cutout.jpg" aria-hidden="true">
+          <source src="cake.mp4" type="video/mp4">
+        </video>
+        <canvas class="cake-hero-canvas" id="cakeHeroCanvas" aria-hidden="true"></canvas>
+        <div class="cake-nebula"></div>
+        <div class="cake-wrap" aria-hidden="true">
+          <div class="cake-scene">
+            <div class="cake-glow"></div>
+            <div class="orbit-back"></div>
+            <div class="orbit-mid"></div>
+            <div class="orbit"></div>
+            <div class="satellite one"></div>
+            <div class="satellite two"></div>
+            <div class="cake">
+              <div class="flame"></div><div class="candle"></div><div class="berry one"></div><div class="berry two"></div><div class="berry three"></div>
+              <div class="cream"></div><div class="cake-layer top"></div><div class="cake-layer middle"></div><div class="cake-layer bottom"></div>
+            </div>
+            <div class="cake-side-glow"></div>
+            <div class="plate"></div>
+            <i class="star-chip one"></i><i class="star-chip two"></i><i class="star-chip three"></i><i class="star-chip four"></i>
+            <i class="star-trail one"></i><i class="star-trail two"></i>
+          </div>
+        </div>
+        <p class="cake-message" id="cakeMessage">许个愿吧，然后选择你的答案。</p>
+        <div class="scene-actions">
+          <button class="secondary-button" id="notLikeButton" type="button">我再想想</button>
+          <button class="secondary-button accent" id="likeButton" type="button">喜欢，继续</button>
+        </div>
+      </div>
+    </section>
+    <section class="screen album-screen" id="albumScreen" aria-label="照片合集">
+      <div class="scene">
+        <div class="album-title"><h2>愿所有温柔与惊喜奔向你，新的一岁，会越来越好</h2></div>
+        <div class="album-stage">
+          <button class="album-control prev" id="albumPrevButton" type="button" aria-label="上一张照片">‹</button>
+          <div class="album-card enter" id="albumCard">
+            <img id="albumImg" src="img/photo1.jpg" alt="照片">
+          </div>
+          <button class="album-control next" id="albumNextPhotoButton" type="button" aria-label="下一张照片">›</button>
+        </div>
+        <div class="album-dots" id="albumDots"></div>
+        <div class="album-actions">
+          <button class="secondary-button accent" id="albumNextButton" type="button">继续看烟花</button>
+        </div>
+      </div>
+    </section>
+    <section class="screen firework-screen" id="fireworkScreen" aria-label="烟花祝福">
+      <div class="scene">
+        <canvas class="scene-canvas" id="fireworkCanvas"></canvas>
+        <div class="firework-copy"><h2>多多，生日快乐</h2><p>愿你眼里有光，心里有糖，走很远的路也一直有人为你鼓掌。</p></div>
+        <button class="music-button" type="button" aria-label="播放或暂停音乐"><span>♫</span><span>音乐</span></button>
+        <div class="scene-actions">
+          <button class="secondary-button" id="replayButton" type="button">再看一次</button>
+          <button class="secondary-button accent" id="toWallpaperButton" type="button">下一步 ›</button>
+        </div>
+      </div>
+    </section>
+    <section class="screen wallpaper-screen" id="wallpaperScreen" aria-label="壁纸背景图">
+      <div class="wallpaper-intro" id="wallpaperIntro">
+        <p class="wallpaper-eyebrow">Surprise</p>
+        <h2>知道你想要<span class="sparkle">美美出片</span></h2>
+        <p class="wallpaper-sub">背景图都给你找好了<br><b>（电脑按 F11 全屏）</b></p>
+        <button class="secondary-button accent" id="startWallpaperButton" type="button">开始看图 ›</button>
+      </div>
+      <div class="wallpaper-viewer" id="wallpaperViewer">
+        <div class="wallpaper-stage" id="wallpaperStage"></div>
+        <div class="wallpaper-count" id="wallpaperCount">1 / 23</div>
+        <div class="wallpaper-full" id="wallpaperFull" role="button" tabindex="0" aria-label="全屏显示">⛶ 全屏</div>
+        <button class="wallpaper-exit" id="wallpaperExit" type="button">✕ 退出</button>
+        <div class="wallpaper-dots" id="wallpaperDots"></div>
+        <p class="wallpaper-tip" id="wallpaperTip">点击画面 · 下一张</p>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (function () {
+      "use strict";
+      var screens = {
+        login: document.getElementById("loginScreen"),
+        particle: document.getElementById("particleScreen"),
+        cake: document.getElementById("cakeScreen"),
+        album: document.getElementById("albumScreen"),
+        firework: document.getElementById("fireworkScreen"),
+        wallpaper: document.getElementById("wallpaperScreen")
+      };
+      var loginForm = document.getElementById("loginForm");
+      var accountInput = document.getElementById("accountInput");
+      var passwordInput = document.getElementById("passwordInput");
+      var formMessage = document.getElementById("formMessage");
+      var particleHeading = document.getElementById("particleHeading");
+      var particleCaption = document.getElementById("particleCaption");
+      var cakeMessage = document.getElementById("cakeMessage");
+      var toast = document.getElementById("toast");
+      var particleTimer = null;
+      var toastTimer = null;
+
+      function showScreen(name) {
+        Object.keys(screens).forEach(function (key) { screens[key].classList.toggle("active", key === name); });
+      }
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2600);
+      }
+      function resizeCanvas(canvas, context, state) {
+        var rect = canvas.getBoundingClientRect();
+        state.width = Math.max(1, Math.floor(rect.width));
+        state.height = Math.max(1, Math.floor(rect.height));
+        state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(state.width * state.dpr);
+        canvas.height = Math.floor(state.height * state.dpr);
+        context.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      }
+
+      var particleCanvas = document.getElementById("particleCanvas");
+      var particleContext = particleCanvas.getContext("2d");
+      var particleState = { width: 0, height: 0, dpr: 1, particles: [], targets: [], text: "", running: false, frame: 0 };
+      function resizeParticleCanvas() {
+        resizeCanvas(particleCanvas, particleContext, particleState);
+        if (particleState.text) { setParticleText(particleState.text); }
+      }
+      function randomParticle(state) {
+        return { x: Math.random() * state.width, y: Math.random() * state.height, tx: state.width / 2, ty: state.height / 2,
+          size: Math.random() * 1.9 + .7, hue: 12 + Math.random() * 52, phase: Math.random() * Math.PI * 2 };
+      }
+      function getTextTargets(text) {
+        var offscreen = document.createElement("canvas");
+        var context = offscreen.getContext("2d");
+        var width = particleState.width;
+        var height = particleState.height;
+        var fontSize = Math.min(150, Math.max(58, width * .18));
+        var sampleStep;
+        var data;
+        var targets = [];
+        var x;
+        var y;
+        offscreen.width = width;
+        offscreen.height = height;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        do {
+          context.font = "800 " + fontSize + "px Microsoft YaHei, PingFang SC, sans-serif";
+          if (context.measureText(text).width <= width * .84) { break; }
+          fontSize -= 2;
+        } while (fontSize > 34);
+        context.fillStyle = "#fff";
+        context.fillText(text, width / 2, height * .48);
+        data = context.getImageData(0, 0, width, height).data;
+        sampleStep = Math.max(3, Math.round(Math.min(width, height) / 125));
+        for (y = 0; y < height; y += sampleStep) {
+          for (x = 0; x < width; x += sampleStep) {
+            if (data[(y * width + x) * 4 + 3] > 80) { targets.push({ x: x, y: y }); }
+          }
+        }
+        return targets;
+      }
+      function setParticleText(text) {
+        var targets = getTextTargets(text);
+        var count = Math.max(targets.length, 360);
+        particleState.text = text;
+        particleState.targets = targets;
+        while (particleState.particles.length < count) { particleState.particles.push(randomParticle(particleState)); }
+        particleState.particles.forEach(function (particle, particleIndex) {
+          var target = targets[particleIndex % targets.length];
+          if (target) {
+            particle.tx = target.x;
+            particle.ty = target.y;
+          } else {
+            particle.tx = particleState.width / 2 + (Math.random() - .5) * particleState.width * .8;
+            particle.ty = particleState.height / 2 + (Math.random() - .5) * particleState.height * .8;
+          }
+          particle.hue = 12 + (particleIndex % 7) * 8 + Math.random() * 14;
+          particle.size = Math.random() * 1.9 + .7;
+          particle.phase = Math.random() * Math.PI * 2;
+        });
+        particleHeading.textContent = text;
+      }
+      function renderParticles() {
+        var now = Date.now() / 1000;
+        if (!particleState.running) { return; }
+        particleContext.fillStyle = "rgba(18, 25, 56, .22)";
+        particleContext.fillRect(0, 0, particleState.width, particleState.height);
+        particleState.particles.forEach(function (particle) {
+          particle.x += (particle.tx - particle.x) * .075;
+          particle.y += (particle.ty - particle.y) * .075;
+          particle.x += Math.sin(now * 1.6 + particle.phase) * .11;
+          particle.y += Math.cos(now * 1.3 + particle.phase) * .11;
+          particleContext.beginPath();
+          particleContext.fillStyle = "hsla(" + particle.hue + ", 100%, 78%, .9)";
+          particleContext.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          particleContext.fill();
+        });
+        particleState.frame = requestAnimationFrame(renderParticles);
+      }
+      function startParticleSequence() {
+        var messages = [
+          { text: "Hi 小公主", caption: "有一份祝福正在路上", delay: 1900 },
+          { text: "雷俐娜", caption: "今天的主角就是你", delay: 1900 },
+          { text: "生日快乐", caption: "愿你的新一岁闪闪发光", delay: 2100 },
+          { text: "happy birthday", caption: "every good thing is on its way", delay: 2100 },
+          { text: "3", caption: "准备好了吗", delay: 900 },
+          { text: "2", caption: "还有一点点", delay: 900 },
+          { text: "1", caption: "惊喜到啦", delay: 900 }
+        ];
+        var index = 0;
+        clearTimeout(particleTimer);
+        cancelAnimationFrame(particleState.frame);
+        particleState.running = true;
+        particleContext.clearRect(0, 0, particleState.width, particleState.height);
+        function playNext() {
+          var message = messages[index];
+          if (!message) {
+            particleCaption.textContent = "";
+            setTimeout(goToCake, 500);
+            return;
+          }
+          setParticleText(message.text);
+          particleCaption.textContent = message.caption;
+          index += 1;
+          particleTimer = setTimeout(playNext, message.delay);
+        }
+        playNext();
+        renderParticles();
+      }
+
+      var cakeStarsCanvas = document.getElementById("cakeStarsCanvas");
+      var cakeStarsContext = cakeStarsCanvas.getContext("2d");
+      var cakeStarsState = { width: 0, height: 0, dpr: 1, stars: [], frame: 0, running: false };
+      function resizeCakeStars() {
+        resizeCanvas(cakeStarsCanvas, cakeStarsContext, cakeStarsState);
+        if (!cakeStarsState.stars.length) {
+          for (var starIndex = 0; starIndex < 150; starIndex += 1) {
+            cakeStarsState.stars.push({
+              x: Math.random(), y: Math.random(), size: .5 + Math.random() * 2.2,
+              alpha: .25 + Math.random() * .75, phase: Math.random() * Math.PI * 2,
+              speed: .4 + Math.random() * 1.2, hue: 185 + Math.random() * 70
+            });
+          }
+        }
+      }
+      function renderCakeStars() {
+        var now = Date.now() / 1000;
+        if (!cakeStarsState.running) { return; }
+        cakeStarsContext.clearRect(0, 0, cakeStarsState.width, cakeStarsState.height);
+        cakeStarsState.stars.forEach(function (star) {
+          var alpha = star.alpha * (.55 + Math.sin(now * star.speed + star.phase) * .45);
+          var x = star.x * cakeStarsState.width;
+          var y = (star.y * cakeStarsState.height + now * star.speed * 3) % cakeStarsState.height;
+          cakeStarsContext.beginPath();
+          cakeStarsContext.fillStyle = "hsla(" + star.hue + ", 100%, 82%, " + alpha + ")";
+          cakeStarsContext.arc(x, y, star.size, 0, Math.PI * 2);
+          cakeStarsContext.fill();
+        });
+        cakeStarsState.frame = requestAnimationFrame(renderCakeStars);
+      }
+      function startCakeStars() {
+        resizeCakeStars();
+        cancelAnimationFrame(cakeStarsState.frame);
+        cakeStarsState.running = true;
+        renderCakeStars();
+      }
+      var cakeHeroCanvas = document.getElementById("cakeHeroCanvas");
+      var cakeHeroContext = cakeHeroCanvas.getContext("2d");
+      var cakeVideo = document.getElementById("cakeVideo");
+      var cakeHeroState = {
+        width: 0, height: 0, dpr: 1, frame: 0, running: false, pointerX: 0, pointerY: 0,
+        particles: [], orbitStars: [], cakeTexture: [], planets: [], burst: []
+      };
+      function resizeCakeHero() {
+        resizeCanvas(cakeHeroCanvas, cakeHeroContext, cakeHeroState);
+        if (!cakeHeroState.particles.length) {
+          for (var particleIndex = 0; particleIndex < 240; particleIndex += 1) {
+            cakeHeroState.particles.push({
+              x: Math.random(), y: Math.random(), z: Math.random(),
+              size: .5 + Math.random() * 2.8, speed: .15 + Math.random() * .7,
+              hue: 185 + Math.random() * 105, phase: Math.random() * Math.PI * 2
+            });
+          }
+        }
+        if (!cakeHeroState.orbitStars.length) {
+          for (var orbitIndex = 0; orbitIndex < 34; orbitIndex += 1) {
+            cakeHeroState.orbitStars.push({
+              angle: Math.random() * Math.PI * 2,
+              radius: .55 + Math.random() * .72,
+              size: 1 + Math.random() * 3.6,
+              color: ["#ffd166", "#77e5ff", "#ff8bd8", "#ffffff"][orbitIndex % 4]
+            });
+          }
+        }
+        if (!cakeHeroState.cakeTexture.length) {
+          for (var textureSeed = 0; textureSeed < 120; textureSeed += 1) {
+            cakeHeroState.cakeTexture.push({
+              x: .04 + Math.random() * .92, y: .05 + Math.random() * .9,
+              size: .7 + Math.random() * 2.5, alpha: .25 + Math.random() * .65,
+              phase: Math.random() * Math.PI * 2,
+              color: textureSeed % 7 === 0 ? "#ffd166" : (textureSeed % 3 === 0 ? "#a8e8ff" : "#ffffff")
+            });
+          }
+        }
+        if (!cakeHeroState.planets.length) {
+          for (var planetIndex = 0; planetIndex < 14; planetIndex += 1) {
+            cakeHeroState.planets.push({
+              angle: Math.random() * Math.PI * 2,
+              radius: .58 + Math.random() * .78,
+              height: .05 + Math.random() * .76,
+              size: 4 + Math.random() * 13,
+              color: ["#ffcb66", "#ff7bbd", "#68dfff", "#987dff", "#fff4bd"][planetIndex % 5],
+              phase: Math.random() * Math.PI * 2,
+              speed: .08 + Math.random() * .18
+            });
+          }
+        }
+        if (!cakeHeroState.burst.length) {
+          for (var burstIndex = 0; burstIndex < 72; burstIndex += 1) {
+            cakeHeroState.burst.push({
+              angle: Math.random() * Math.PI * 2,
+              distance: .2 + Math.random() * .82,
+              size: .8 + Math.random() * 3.8,
+              color: ["#ffd166", "#ff8bd8", "#72e6ff", "#ffffff"][burstIndex % 4],
+              phase: Math.random() * Math.PI * 2
+            });
+          }
+        }
+      }
+      function roundedCakePath(context, x, y, width, height, radius) {
+        var r = Math.min(radius, width / 2, height / 2);
+        context.beginPath();
+        context.moveTo(x + r, y);
+        context.lineTo(x + width - r, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + r);
+        context.lineTo(x + width, y + height - r);
+        context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        context.lineTo(x + r, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - r);
+        context.lineTo(x, y + r);
+        context.quadraticCurveTo(x, y, x + r, y);
+        context.closePath();
+      }
+      function drawHeroRing(context, cx, cy, rx, ry, rotation, alpha, color, width) {
+        context.save();
+        context.translate(cx, cy);
+        context.rotate(rotation);
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.strokeStyle = color;
+        context.globalAlpha = alpha;
+        context.lineWidth = width;
+        context.shadowColor = color;
+        context.shadowBlur = 12;
+        context.stroke();
+        context.restore();
+      }
+      function drawHeroSpark(context, x, y, size, color, alpha) {
+        context.save();
+        context.globalAlpha = alpha;
+        context.fillStyle = color;
+        context.shadowColor = color;
+        context.shadowBlur = size * 5;
+        context.beginPath();
+        context.arc(x, y, size, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+      function drawHeroOrb(context, x, y, radius, color, alpha, time) {
+        var gradient = context.createRadialGradient(x - radius * .35, y - radius * .45, radius * .08, x, y, radius);
+        gradient.addColorStop(0, "#ffffff");
+        gradient.addColorStop(.16, color);
+        gradient.addColorStop(.58, color);
+        gradient.addColorStop(1, "rgba(7, 11, 45, .1)");
+        context.save();
+        context.globalAlpha = alpha;
+        context.fillStyle = gradient;
+        context.shadowColor = color;
+        context.shadowBlur = radius * 2.8;
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+        context.globalAlpha = alpha * (.45 + Math.sin(time * 2 + x) * .2);
+        context.fillStyle = "#ffffff";
+        context.beginPath();
+        context.arc(x - radius * .32, y - radius * .38, Math.max(1, radius * .16), 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+      function drawHeroRibbon(context, cx, cy, rx, ry, rotation, time, phase, colorA, colorB, width, alpha) {
+        var gradient;
+        context.save();
+        context.translate(cx, cy);
+        context.rotate(rotation);
+        gradient = context.createLinearGradient(-rx, 0, rx, 0);
+        gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+        gradient.addColorStop(.18, colorA);
+        gradient.addColorStop(.52, colorB);
+        gradient.addColorStop(.82, colorA);
+        gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+        context.globalAlpha = alpha;
+        context.strokeStyle = gradient;
+        context.lineWidth = width;
+        context.shadowColor = colorB;
+        context.shadowBlur = 12;
+        context.setLineDash([rx * .32, rx * .045]);
+        context.lineDashOffset = -time * 38 - phase;
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.setLineDash([]);
+        context.restore();
+      }
+      function drawHeroBurst(context, cx, cy, radius, time) {
+        var burstIndex;
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        for (burstIndex = 0; burstIndex < cakeHeroState.burst.length; burstIndex += 1) {
+          var burst = cakeHeroState.burst[burstIndex];
+          var distance = radius * burst.distance * (.9 + Math.sin(time * 1.8 + burst.phase) * .08);
+          var x = cx + Math.cos(burst.angle + time * .08) * distance;
+          var y = cy + Math.sin(burst.angle + time * .08) * distance * .55;
+          var alpha = .25 + Math.sin(time * 2.2 + burst.phase) * .28;
+          if (burstIndex % 4 === 0) {
+            context.strokeStyle = burst.color;
+            context.globalAlpha = Math.max(.08, alpha);
+            context.lineWidth = .8 + burst.size * .18;
+            context.beginPath();
+            context.moveTo(cx + Math.cos(burst.angle) * distance * .35, cy + Math.sin(burst.angle) * distance * .2);
+            context.lineTo(x, y);
+            context.stroke();
+          }
+          drawHeroSpark(context, x, y, burst.size, burst.color, Math.max(.12, alpha));
+        }
+        context.restore();
+      }
+      function drawHeroDecorativeStars(context, cx, topY, width, height, time) {
+        var planetIndex;
+        for (planetIndex = 0; planetIndex < cakeHeroState.planets.length; planetIndex += 1) {
+          var planet = cakeHeroState.planets[planetIndex];
+          var planetAngle = planet.angle + time * planet.speed;
+          var orbitRadius = width * planet.radius;
+          var planetX = cx + Math.cos(planetAngle) * orbitRadius;
+          var planetY = topY + height * planet.height + Math.sin(planetAngle) * width * .18;
+          drawHeroOrb(context, planetX, planetY, planet.size, planet.color, .68, time);
+          if (planetIndex % 3 === 0) {
+            drawHeroRing(context, planetX, planetY, planet.size * 2.2, planet.size * .62, planetAngle, .6, planet.color, 1.4);
+          }
+        }
+      }
+      function drawHeroPlate(context, cx, y, width, time) {
+        var plateGradient = context.createRadialGradient(cx, y - 4, 4, cx, y, width * .72);
+        plateGradient.addColorStop(0, "#fff9d2");
+        plateGradient.addColorStop(.18, "#ffd58a");
+        plateGradient.addColorStop(.35, "#75cfff");
+        plateGradient.addColorStop(.58, "#8da8ff");
+        plateGradient.addColorStop(.78, "#273c9a");
+        plateGradient.addColorStop(1, "rgba(16, 27, 86, 0)");
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        context.shadowColor = "#71cfff";
+        context.shadowBlur = 20;
+        context.fillStyle = plateGradient;
+        context.beginPath();
+        context.ellipse(cx, y, width * .7, width * .13, 0, 0, Math.PI * 2);
+        context.fill();
+        context.globalCompositeOperation = "source-over";
+        context.strokeStyle = "rgba(231, 247, 255, .85)";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.ellipse(cx, y - 1, width * .54, width * .085, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.strokeStyle = "rgba(104, 191, 255, .72)";
+        context.lineWidth = 7;
+        context.beginPath();
+        context.ellipse(cx, y + 3, width * .68, width * .12, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.strokeStyle = "rgba(255, 204, 139, .8)";
+        context.lineWidth = 2;
+        context.setLineDash([width * .08, width * .05]);
+        context.lineDashOffset = -time * 25;
+        context.beginPath();
+        context.ellipse(cx, y - 3, width * .62, width * .1, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.setLineDash([]);
+        context.restore();
+      }
+      function drawHeroDoodleStar(context, x, y, size, color, rotation, alpha) {
+        var pointIndex;
+        context.save();
+        context.translate(x, y);
+        context.rotate(rotation || 0);
+        context.globalAlpha = alpha === undefined ? 1 : alpha;
+        context.fillStyle = color;
+        context.strokeStyle = "rgba(255, 255, 255, .72)";
+        context.lineWidth = Math.max(1, size * .12);
+        context.shadowColor = color;
+        context.shadowBlur = size * 1.8;
+        context.beginPath();
+        for (pointIndex = 0; pointIndex < 10; pointIndex += 1) {
+          var angle = -Math.PI / 2 + pointIndex * Math.PI / 5;
+          var radius = pointIndex % 2 === 0 ? size : size * .34;
+          var pointX = Math.cos(angle) * radius;
+          var pointY = Math.sin(angle) * radius;
+          if (pointIndex === 0) { context.moveTo(pointX, pointY); }
+          else { context.lineTo(pointX, pointY); }
+        }
+        context.closePath();
+        context.fill();
+        context.stroke();
+        context.restore();
+      }
+      function drawHeroDoodleCross(context, x, y, size, color, rotation, alpha) {
+        context.save();
+        context.translate(x, y);
+        context.rotate(rotation || 0);
+        context.globalAlpha = alpha === undefined ? 1 : alpha;
+        context.strokeStyle = color;
+        context.lineWidth = Math.max(1, size * .16);
+        context.lineCap = "round";
+        context.shadowColor = color;
+        context.shadowBlur = size * 2;
+        context.beginPath();
+        context.moveTo(-size, 0);
+        context.lineTo(size, 0);
+        context.moveTo(0, -size);
+        context.lineTo(0, size);
+        context.stroke();
+        context.restore();
+      }
+      function drawHeroDoodleTierPath(context, tier) {
+        var left = tier.cx - tier.rx;
+        var right = tier.cx + tier.rx;
+        var bottom = tier.cy + tier.height;
+        context.beginPath();
+        context.moveTo(left + tier.rx * .06, tier.cy + tier.ry * .12);
+        context.bezierCurveTo(left + tier.rx * .34, tier.cy - tier.ry * .04, tier.cx - tier.rx * .12, tier.cy + tier.ry * .1, tier.cx, tier.cy + tier.ry * .02);
+        context.bezierCurveTo(tier.cx + tier.rx * .2, tier.cy - tier.ry * .08, right - tier.rx * .22, tier.cy + tier.ry * .12, right - tier.rx * .04, tier.cy + tier.ry * .08);
+        context.lineTo(right - tier.rx * .02, bottom - tier.height * .15);
+        context.bezierCurveTo(right - tier.rx * .14, bottom - tier.height * .02, right - tier.rx * .24, bottom - tier.height * .17, right - tier.rx * .36, bottom - tier.height * .05);
+        context.bezierCurveTo(right - tier.rx * .5, bottom + tier.height * .04, right - tier.rx * .57, bottom - tier.height * .12, right - tier.rx * .7, bottom - tier.height * .02);
+        context.bezierCurveTo(tier.cx + tier.rx * .08, bottom + tier.height * .05, tier.cx - tier.rx * .03, bottom - tier.height * .13, tier.cx - tier.rx * .19, bottom - tier.height * .01);
+        context.bezierCurveTo(tier.cx - tier.rx * .36, bottom + tier.height * .04, tier.cx - tier.rx * .44, bottom - tier.height * .12, left + tier.rx * .27, bottom - tier.height * .03);
+        context.bezierCurveTo(left + tier.rx * .14, bottom + tier.height * .03, left + tier.rx * .04, bottom - tier.height * .1, left + tier.rx * .02, bottom - tier.height * .16);
+        context.closePath();
+      }
+      function drawHeroDoodleTier(context, tier, palette, time, tierIndex) {
+        var bodyLeft = tier.cx - tier.rx;
+        var textureIndex;
+        var texture;
+        var faceGradient;
+        var bodyGradient;
+        var icingY = tier.cy + tier.ry * .48;
+        var starColors = [palette.accent, palette.spark, "#fff4cb", "#ff9fd6"];
+
+        bodyGradient = context.createLinearGradient(bodyLeft, tier.cy, bodyLeft + tier.rx * 2, tier.cy + tier.height);
+        bodyGradient.addColorStop(0, palette.bodyA);
+        bodyGradient.addColorStop(.27, palette.bodyB);
+        bodyGradient.addColorStop(.52, palette.bodyC);
+        bodyGradient.addColorStop(.8, palette.bodyB);
+        bodyGradient.addColorStop(1, palette.bodyA);
+
+        context.save();
+        context.shadowColor = palette.glow;
+        context.shadowBlur = 18 + tier.rx * .08;
+        drawHeroDoodleTierPath(context, tier);
+        context.fillStyle = bodyGradient;
+        context.fill();
+        context.restore();
+
+        context.save();
+        drawHeroDoodleTierPath(context, tier);
+        context.clip();
+        for (textureIndex = 0; textureIndex < cakeHeroState.cakeTexture.length; textureIndex += 1) {
+          texture = cakeHeroState.cakeTexture[textureIndex];
+          if ((textureIndex + tierIndex) % 3 !== 0) { continue; }
+          drawHeroSpark(
+            context,
+            bodyLeft + ((texture.x + tierIndex * .17) % .86 + .05) * tier.rx * 2,
+            tier.cy + (.12 + ((texture.y + tierIndex * .13) % .72)) * tier.height,
+            texture.size * (.7 + tierIndex * .08),
+            texture.color,
+            texture.alpha * (.5 + Math.sin(time * .8 + texture.phase) * .18)
+          );
+        }
+        var sideLight = ((Math.sin(time * .62 + tierIndex) + 1) / 2) * tier.rx * 2;
+        var lightGradient = context.createLinearGradient(bodyLeft + sideLight - 70, 0, bodyLeft + sideLight + 70, 0);
+        lightGradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+        lightGradient.addColorStop(.5, "rgba(181, 234, 255, .24)");
+        lightGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+        context.fillStyle = lightGradient;
+        context.fillRect(bodyLeft, tier.cy, tier.rx * 2, tier.height);
+        context.restore();
+
+        faceGradient = context.createRadialGradient(
+          tier.cx - tier.rx * .28, tier.cy - tier.ry * .5, 2,
+          tier.cx, tier.cy, tier.rx * 1.1
+        );
+        faceGradient.addColorStop(0, palette.faceA);
+        faceGradient.addColorStop(.34, palette.faceB);
+        faceGradient.addColorStop(.72, palette.faceC);
+        faceGradient.addColorStop(1, palette.bodyA);
+
+        context.save();
+        context.beginPath();
+        context.ellipse(tier.cx, tier.cy, tier.rx, tier.ry, 0, 0, Math.PI * 2);
+        context.fillStyle = faceGradient;
+        context.shadowColor = palette.glow;
+        context.shadowBlur = 14;
+        context.fill();
+        context.clip();
+        context.globalAlpha = .75;
+        context.lineCap = "round";
+        context.lineWidth = Math.max(2, tier.rx * .018);
+        context.strokeStyle = palette.galaxy;
+        context.beginPath();
+        context.moveTo(tier.cx - tier.rx * .92, tier.cy + tier.ry * .1);
+        context.bezierCurveTo(tier.cx - tier.rx * .52, tier.cy - tier.ry * .9, tier.cx - tier.rx * .1, tier.cy + tier.ry * .92, tier.cx + tier.rx * .25, tier.cy - tier.ry * .18);
+        context.bezierCurveTo(tier.cx + tier.rx * .48, tier.cy - tier.ry * .52, tier.cx + tier.rx * .67, tier.cy + tier.ry * .65, tier.cx + tier.rx * .95, tier.cy - tier.ry * .08);
+        context.stroke();
+        context.strokeStyle = palette.accent;
+        context.lineWidth = Math.max(1, tier.rx * .009);
+        context.beginPath();
+        context.moveTo(tier.cx - tier.rx * .82, tier.cy - tier.ry * .35);
+        context.bezierCurveTo(tier.cx - tier.rx * .38, tier.cy + tier.ry * .62, tier.cx + tier.rx * .12, tier.cy - tier.ry * .72, tier.cx + tier.rx * .78, tier.cy + tier.ry * .32);
+        context.stroke();
+        for (textureIndex = 0; textureIndex < 9; textureIndex += 1) {
+          var faceX = tier.cx + ([-.72, -.43, -.1, .2, .55, .74, -.57, .08, .42][textureIndex]) * tier.rx;
+          var faceY = tier.cy + ([.02, -.3, .36, -.25, .15, -.08, .48, -.51, .48][textureIndex]) * tier.ry;
+          if (textureIndex % 3 === 0) {
+            drawHeroDoodleStar(context, faceX, faceY, Math.max(2.6, tier.rx * .035), starColors[textureIndex % starColors.length], textureIndex * .4, .92);
+          } else {
+            drawHeroDoodleCross(context, faceX, faceY, Math.max(1.8, tier.rx * .024), starColors[textureIndex % starColors.length], textureIndex * .5, .9);
+          }
+        }
+        context.restore();
+
+        context.save();
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.strokeStyle = palette.cream;
+        context.shadowColor = palette.cream;
+        context.shadowBlur = 9;
+        context.lineWidth = Math.max(4, tier.ry * .28);
+        context.beginPath();
+        context.moveTo(bodyLeft + tier.rx * .1, icingY);
+        context.bezierCurveTo(
+          bodyLeft + tier.rx * .34, icingY - tier.ry * .25,
+          tier.cx - tier.rx * .2, icingY + tier.ry * .25,
+          tier.cx, icingY - tier.ry * .08
+        );
+        context.bezierCurveTo(
+          tier.cx + tier.rx * .24, icingY - tier.ry * .35,
+          tier.cx + tier.rx * .55, icingY + tier.ry * .24,
+          tier.cx + tier.rx * .9, icingY - tier.ry * .04
+        );
+        context.stroke();
+        context.strokeStyle = palette.accent;
+        context.shadowBlur = 5;
+        context.lineWidth = Math.max(1, tier.ry * .06);
+        context.beginPath();
+        context.moveTo(bodyLeft + tier.rx * .08, icingY - tier.ry * .45);
+        context.bezierCurveTo(
+          bodyLeft + tier.rx * .32, icingY - tier.ry * .7,
+          tier.cx - tier.rx * .22, icingY - tier.ry * .08,
+          tier.cx + tier.rx * .02, icingY - tier.ry * .48
+        );
+        context.bezierCurveTo(
+          tier.cx + tier.rx * .3, icingY - tier.ry * .9,
+          tier.cx + tier.rx * .6, icingY - tier.ry * .05,
+          tier.cx + tier.rx * .92, icingY - tier.ry * .46
+        );
+        context.stroke();
+        context.restore();
+
+        context.save();
+        context.strokeStyle = palette.outline;
+        context.lineWidth = Math.max(1.5, tier.rx * .014);
+        context.shadowColor = palette.glow;
+        context.shadowBlur = 8;
+        drawHeroDoodleTierPath(context, tier);
+        context.stroke();
+        context.globalAlpha = .48;
+        context.translate(2, 1);
+        context.strokeStyle = palette.secondaryOutline;
+        context.lineWidth = Math.max(1, tier.rx * .009);
+        drawHeroDoodleTierPath(context, tier);
+        context.stroke();
+        context.setLineDash([tier.rx * .08, tier.rx * .07]);
+        context.lineDashOffset = -time * 12 - tierIndex * 8;
+        context.globalAlpha = .65;
+        context.beginPath();
+        context.ellipse(tier.cx, tier.cy, tier.rx * .94, tier.ry * .92, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.setLineDash([]);
+        context.restore();
+
+        context.save();
+        context.globalAlpha = .72;
+        for (textureIndex = 0; textureIndex < 7; textureIndex += 1) {
+          var sprinkleX = bodyLeft + tier.rx * (.2 + textureIndex * .12);
+          var sprinkleY = tier.cy + tier.height * (.54 + (textureIndex % 3) * .08);
+          context.strokeStyle = starColors[(textureIndex + tierIndex) % starColors.length];
+          context.lineWidth = Math.max(1, tier.rx * .012);
+          context.lineCap = "round";
+          context.beginPath();
+          context.moveTo(sprinkleX, sprinkleY);
+          context.lineTo(sprinkleX + 5 + (textureIndex % 2) * 2, sprinkleY - 3);
+          context.stroke();
+        }
+        context.restore();
+      }
+      function drawHeroDoodleCandle(context, x, baseY, candleHeight, candleWidth, color, time, index) {
+        var candleTop = baseY - candleHeight;
+        var bodyGradient = context.createLinearGradient(x - candleWidth, 0, x + candleWidth, 0);
+        bodyGradient.addColorStop(0, "#b6c9ff");
+        bodyGradient.addColorStop(.32, "#fff9df");
+        bodyGradient.addColorStop(.6, color);
+        bodyGradient.addColorStop(1, "#6c75da");
+        context.save();
+        context.globalAlpha = .32;
+        context.fillStyle = "#e89fd8";
+        context.shadowColor = "#e89fd8";
+        context.shadowBlur = 20;
+        context.beginPath();
+        context.ellipse(x, candleTop + candleHeight * .4, candleWidth * 2.6, candleHeight * .72, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        context.save();
+        context.beginPath();
+        context.moveTo(x - candleWidth, baseY);
+        context.lineTo(x - candleWidth * 1.02, candleTop + 5);
+        context.quadraticCurveTo(x, candleTop - 1, x + candleWidth * 1.02, candleTop + 5);
+        context.lineTo(x + candleWidth, baseY);
+        context.closePath();
+        context.fillStyle = bodyGradient;
+        context.fill();
+        context.strokeStyle = "rgba(235, 247, 255, .9)";
+        context.lineWidth = 1.2;
+        context.stroke();
+        context.save();
+        context.clip();
+        context.strokeStyle = index % 2 ? "#ff9fd6" : "#6fe2ff";
+        context.lineWidth = Math.max(2, candleWidth * .28);
+        context.globalAlpha = .8;
+        var stripeIndex;
+        for (stripeIndex = -2; stripeIndex < 5; stripeIndex += 1) {
+          context.beginPath();
+          context.moveTo(x - candleWidth * 1.4 + stripeIndex * candleWidth * .7, baseY + 3);
+          context.lineTo(x + candleWidth * .5 + stripeIndex * candleWidth * .7, candleTop - 3);
+          context.stroke();
+        }
+        context.restore();
+        context.restore();
+
+        context.save();
+        context.strokeStyle = "#fff4c9";
+        context.lineWidth = Math.max(1, candleWidth * .16);
+        context.lineCap = "round";
+        context.beginPath();
+        context.moveTo(x, candleTop + 2);
+        context.lineTo(x + Math.sin(time * 2 + index) * 1.4, candleTop - 4);
+        context.stroke();
+        context.fillStyle = "#ffd166";
+        context.shadowColor = "#ffb84d";
+        context.shadowBlur = 20;
+        context.beginPath();
+        context.moveTo(x, candleTop - 5);
+        context.bezierCurveTo(x - candleWidth * 1.15, candleTop - candleWidth * 2.2, x + candleWidth * .9, candleTop - candleWidth * 3.2, x + candleWidth * .2, candleTop - candleWidth * 4.8);
+        context.bezierCurveTo(x + candleWidth * 1.55, candleTop - candleWidth * 3.4, x + candleWidth * 1.22, candleTop - candleWidth * 1.3, x, candleTop - 5);
+        context.fill();
+        context.fillStyle = "#fff8bf";
+        context.shadowBlur = 7;
+        context.beginPath();
+        context.ellipse(x + candleWidth * .18, candleTop - candleWidth * 2.3, candleWidth * .28, candleWidth * .9, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+      function drawLegacyHeroCake(context, cx, topY, width, height, time) {
+        var bottomTier = {
+          cx: cx, cy: topY + height * .58, rx: width * .5, ry: Math.max(13, width * .105),
+          height: height * .27
+        };
+        var middleTier = {
+          cx: cx, cy: topY + height * .38, rx: width * .39, ry: Math.max(11, width * .094),
+          height: height * .235
+        };
+        var topTier = {
+          cx: cx, cy: topY + height * .18, rx: width * .29, ry: Math.max(10, width * .083),
+          height: height * .225
+        };
+        var palettes = [
+          {
+            bodyA: "#0a123e", bodyB: "#26398e", bodyC: "#11165d",
+            faceA: "#84dfff", faceB: "#425ad2", faceC: "#191655",
+            cream: "#e9faff", accent: "#ffd166", spark: "#ff9fd6",
+            galaxy: "#a8e8ff", outline: "#8edcff", secondaryOutline: "#ffc7ef", glow: "#508dff"
+          },
+          {
+            bodyA: "#151650", bodyB: "#4845b5", bodyC: "#24206d",
+            faceA: "#c2a6ff", faceB: "#5a62dc", faceC: "#21195f",
+            cream: "#fff2cf", accent: "#72e6ff", spark: "#ff9fcf",
+            galaxy: "#ffb8e6", outline: "#b6a6ff", secondaryOutline: "#75e9ff", glow: "#827dff"
+          },
+          {
+            bodyA: "#28337d", bodyB: "#6d73dc", bodyC: "#2d2d83",
+            faceA: "#f6d4ff", faceB: "#7187e9", faceC: "#302b8c",
+            cream: "#fff8de", accent: "#ffd166", spark: "#8deaff",
+            galaxy: "#fff0bd", outline: "#e5c8ff", secondaryOutline: "#8ce9ff", glow: "#b184ff"
+          }
+        ];
+        var tierList = [bottomTier, middleTier, topTier];
+        var tierIndex;
+
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        var cakeGlow = context.createRadialGradient(cx, topY + height * .78, 6, cx, topY + height * .78, width * .9);
+        cakeGlow.addColorStop(0, "rgba(88, 174, 255, .34)");
+        cakeGlow.addColorStop(.44, "rgba(112, 90, 255, .16)");
+        cakeGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+        context.fillStyle = cakeGlow;
+        context.beginPath();
+        context.ellipse(cx, topY + height * .92, width * .72, height * .22, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        for (tierIndex = 0; tierIndex < tierList.length; tierIndex += 1) {
+          drawHeroDoodleTier(context, tierList[tierIndex], palettes[tierIndex], time, tierIndex);
+        }
+
+        context.save();
+        context.strokeStyle = "#ffd166";
+        context.shadowColor = "#ffd166";
+        context.shadowBlur = 8;
+        context.lineWidth = Math.max(1, width * .012);
+        context.lineCap = "round";
+        context.beginPath();
+        context.moveTo(cx - topTier.rx * .62, topTier.cy - topTier.ry * .02);
+        context.bezierCurveTo(cx - topTier.rx * .25, topTier.cy - topTier.ry * .7, cx + topTier.rx * .02, topTier.cy + topTier.ry * .64, cx + topTier.rx * .3, topTier.cy - topTier.ry * .2);
+        context.bezierCurveTo(cx + topTier.rx * .46, topTier.cy - topTier.ry * .6, cx + topTier.rx * .57, topTier.cy + topTier.ry * .35, cx + topTier.rx * .7, topTier.cy + topTier.ry * .03);
+        context.stroke();
+        context.restore();
+
+        drawHeroDoodleCandle(context, cx - width * .15, topTier.cy - topTier.ry * .1, height * .14, Math.max(4, width * .025), "#ff9fcf", time, 0);
+        drawHeroDoodleCandle(context, cx, topTier.cy - topTier.ry * .22, height * .18, Math.max(4.5, width * .028), "#83e7ff", time, 1);
+        drawHeroDoodleCandle(context, cx + width * .15, topTier.cy - topTier.ry * .08, height * .15, Math.max(4, width * .025), "#ffd166", time, 2);
+
+        context.save();
+        drawHeroDoodleStar(context, cx - width * .34, bottomTier.cy + bottomTier.height * .45, Math.max(4, width * .035), "#ffd166", time * .2, .9);
+        drawHeroDoodleStar(context, cx + width * .37, middleTier.cy + middleTier.height * .56, Math.max(3, width * .028), "#80e8ff", -time * .16, .9);
+        drawHeroDoodleCross(context, cx - width * .2, topTier.cy + topTier.height * .65, Math.max(3, width * .022), "#ff9fd6", time * .3, .9);
+        context.restore();
+      }
+      function drawHeroWatercolorBokeh(context, cx, cy, width, height, time) {
+        var colors = ["#ffd166", "#ff9fd6", "#66d9ff", "#ffb366", "#ff8bc8", "#7ab8ff"];
+        var bokehIndex;
+        var splashIndex;
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        for (bokehIndex = 0; bokehIndex < 28; bokehIndex += 1) {
+          var angle = bokehIndex / 28 * Math.PI * 2 + time * (.018 + (bokehIndex % 3) * .006);
+          var orbitRadius = width * (.62 + (bokehIndex % 6) * .11);
+          var bokehX = cx + Math.cos(angle) * orbitRadius;
+          var bokehY = cy + Math.sin(angle) * Math.max(
+            width * (.28 + (bokehIndex % 4) * .065),
+            height * (.54 + (bokehIndex % 3) * .08)
+          ) + (bokehIndex % 3 - 1) * height * .06;
+          var bokehRadius = Math.max(4, width * (.012 + (bokehIndex % 5) * .006));
+          var bokehGradient = context.createRadialGradient(
+            bokehX - bokehRadius * .34, bokehY - bokehRadius * .42, 1,
+            bokehX, bokehY, bokehRadius
+          );
+          bokehGradient.addColorStop(0, "rgba(255, 255, 255, .95)");
+          bokehGradient.addColorStop(.16, colors[bokehIndex % colors.length]);
+          bokehGradient.addColorStop(.72, colors[bokehIndex % colors.length]);
+          bokehGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+          context.globalAlpha = .2 + (bokehIndex % 5) * .055;
+          context.fillStyle = bokehGradient;
+          context.shadowColor = colors[bokehIndex % colors.length];
+          context.shadowBlur = bokehRadius * 2.2;
+          context.beginPath();
+          context.arc(bokehX, bokehY, bokehRadius, 0, Math.PI * 2);
+          context.fill();
+          if (bokehIndex % 3 === 0) {
+            for (splashIndex = 0; splashIndex < 3; splashIndex += 1) {
+              var splashAngle = angle + splashIndex * 2.1;
+              var splashRadius = bokehRadius * (.95 + splashIndex * .46);
+              context.globalAlpha = .2;
+              context.fillStyle = colors[(bokehIndex + splashIndex + 2) % colors.length];
+              context.beginPath();
+              context.arc(
+                bokehX + Math.cos(splashAngle) * splashRadius,
+                bokehY + Math.sin(splashAngle) * splashRadius,
+                Math.max(1, bokehRadius * (.12 + splashIndex * .045)),
+                0,
+                Math.PI * 2
+              );
+              context.fill();
+            }
+          }
+        }
+        for (bokehIndex = 0; bokehIndex < 96; bokehIndex += 1) {
+          var speckAngle = bokehIndex * 2.399 + time * (.02 + (bokehIndex % 4) * .003);
+          var speckRadius = width * (.46 + (bokehIndex % 10) * .075);
+          var speckX = cx + Math.cos(speckAngle) * speckRadius;
+          var speckY = cy + Math.sin(speckAngle) * Math.max(
+            width * (.36 + (bokehIndex % 5) * .06),
+            height * (.7 + (bokehIndex % 4) * .08)
+          );
+          var speckSize = Math.max(.55, width * (.002 + (bokehIndex % 4) * .0016));
+          context.globalAlpha = .16 + (bokehIndex % 5) * .055;
+          context.fillStyle = bokehIndex % 4 === 0 ? "#ffffff" : colors[bokehIndex % colors.length];
+          context.beginPath();
+          context.arc(speckX, speckY, speckSize, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+      }
+      function drawHeroOutsideOrbit(context, cx, cy, rx, ry, rotation, color, lineWidth, alpha, time, phase) {
+        var dotAngle;
+        var dotX;
+        var dotY;
+        context.save();
+        context.translate(cx, cy);
+        context.rotate(rotation);
+        context.globalAlpha = alpha;
+        context.strokeStyle = color;
+        context.lineWidth = lineWidth;
+        context.lineCap = "round";
+        context.shadowColor = color;
+        context.shadowBlur = 18;
+        // 实金光带，带渐变
+        var orbitGrad = context.createLinearGradient(-rx, 0, rx, 0);
+        orbitGrad.addColorStop(0, "rgba(255,255,255,0)");
+        orbitGrad.addColorStop(.2, color);
+        orbitGrad.addColorStop(.5, color);
+        orbitGrad.addColorStop(.8, color);
+        orbitGrad.addColorStop(1, "rgba(255,255,255,0)");
+        context.strokeStyle = orbitGrad;
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.globalAlpha = alpha * .35;
+        context.lineWidth = lineWidth * 2.2;
+        context.beginPath();
+        context.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+        context.stroke();
+        context.restore();
+
+        dotAngle = time * (.12 + phase * .002) + phase;
+        dotX = cx + Math.cos(dotAngle + rotation) * rx;
+        dotY = cy + Math.sin(dotAngle + rotation) * ry;
+        drawHeroSpark(context, dotX, dotY, Math.max(2, lineWidth * 1.6), color, alpha * .95);
+      }
+      function drawHeroSingleCakeBodyPath(context, cx, rx, top, bodyHeight) {
+        var left = cx - rx;
+        var right = cx + rx;
+        var bottom = top + bodyHeight;
+        context.beginPath();
+        context.moveTo(left + rx * .02, top + 2);
+        context.bezierCurveTo(left + rx * .3, top - 4, cx - rx * .12, top + 4, cx, top);
+        context.bezierCurveTo(cx + rx * .22, top - 4, right - rx * .24, top + 4, right - rx * .02, top + 2);
+        context.lineTo(right - rx * .03, bottom);
+        context.lineTo(left + rx * .03, bottom);
+        context.closePath();
+      }
+      function drawHeroSingleCake(context, cx, cy, width, height, time) {
+        var rx = width * .5;
+        var ry = Math.max(22, width * .135);
+        var bodyTop = cy + ry * .22;
+        var bodyHeight = height;
+        var left = cx - rx;
+        var textureIndex;
+        var texture;
+
+        // 地面柔光
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        var groundGlow = context.createRadialGradient(cx, bodyTop + bodyHeight + 10, 3, cx, bodyTop + bodyHeight + 10, width * .65);
+        groundGlow.addColorStop(0, "rgba(100, 140, 255, .18)");
+        groundGlow.addColorStop(.5, "rgba(80, 110, 220, .07)");
+        groundGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+        context.fillStyle = groundGlow;
+        context.beginPath();
+        context.ellipse(cx, bodyTop + bodyHeight + 12, rx * .8, 16, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        // ===== 蛋糕侧面（深蓝圆柱）=====
+        var bodyGradient = context.createLinearGradient(left, 0, cx + rx, 0);
+        bodyGradient.addColorStop(0, "#0d1b4a");
+        bodyGradient.addColorStop(.15, "#162866");
+        bodyGradient.addColorStop(.45, "#2a4db8");
+        bodyGradient.addColorStop(.65, "#1a3585");
+        bodyGradient.addColorStop(1, "#0a1540");
+
+        context.save();
+        drawHeroSingleCakeBodyPath(context, cx, rx, bodyTop, bodyHeight);
+        context.fillStyle = bodyGradient;
+        context.fill();
+        context.restore();
+
+        // 侧面装饰：金色星星 + 彩色小圆点（水彩风，不发光）
+        context.save();
+        drawHeroSingleCakeBodyPath(context, cx, rx, bodyTop, bodyHeight);
+        context.clip();
+
+        // 柔和的侧面高光
+        var sideHighlight = context.createLinearGradient(cx - rx * .3, 0, cx + rx * .3, 0);
+        sideHighlight.addColorStop(0, "rgba(255,255,255,0)");
+        sideHighlight.addColorStop(.5, "rgba(140, 180, 255, .18)");
+        sideHighlight.addColorStop(1, "rgba(255,255,255,0)");
+        context.fillStyle = sideHighlight;
+        context.fillRect(left, bodyTop, width, bodyHeight);
+
+        // 金色星星
+        var sideStars = [
+          { x: .18, y: .25, s: 5 }, { x: .42, y: .15, s: 4 }, { x: .7, y: .3, s: 6 },
+          { x: .28, y: .55, s: 4 }, { x: .58, y: .6, s: 5 }, { x: .82, y: .5, s: 4 },
+          { x: .12, y: .75, s: 4 }, { x: .48, y: .82, s: 5 }, { x: .75, y: .78, s: 4 }
+        ];
+        for (var si = 0; si < sideStars.length; si += 1) {
+          var st = sideStars[si];
+          drawHeroDoodleStar(context, left + st.x * width, bodyTop + st.y * bodyHeight, st.s, "#ffd166", si * .4, .9);
+        }
+
+        // 彩色小圆点
+        var sideDots = [
+          { x: .1, y: .4, c: "#ffd166" }, { x: .35, y: .35, c: "#66d9ff" },
+          { x: .6, y: .2, c: "#ff9fd6" }, { x: .85, y: .35, c: "#ffb366" },
+          { x: .2, y: .65, c: "#66d9ff" }, { x: .5, y: .45, c: "#ffd166" },
+          { x: .78, y: .65, c: "#ff9fd6" }, { x: .35, y: .85, c: "#ffb366" },
+          { x: .65, y: .85, c: "#66d9ff" }, { x: .9, y: .8, c: "#ffd166" },
+          { x: .15, y: .15, c: "#ff9fd6" }, { x: .88, y: .15, c: "#66d9ff" }
+        ];
+        for (var di = 0; di < sideDots.length; di += 1) {
+          var dot = sideDots[di];
+          context.fillStyle = dot.c;
+          context.globalAlpha = .75;
+          context.beginPath();
+          context.arc(left + dot.x * width, bodyTop + dot.y * bodyHeight, 2.5, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+
+        // ===== 奶油顶部（白色云朵淋面，波浪边自然下垂）=====
+        var creamGradient = context.createRadialGradient(cx, cy - ry * .2, 2, cx, cy, rx * 1.05);
+        creamGradient.addColorStop(0, "#fffefb");
+        creamGradient.addColorStop(.4, "#fff5f0");
+        creamGradient.addColorStop(.75, "#ffe4ec");
+        creamGradient.addColorStop(1, "#e8cfe0");
+
+        context.save();
+        context.beginPath();
+        // 波浪边淋面：顶部椭圆 + 不规则下垂边
+        var creamTopY = cy - ry * .3;
+        var creamMidY = cy;
+        var creamBottomY = cy + ry * .75;
+        // 上边椭圆
+        context.moveTo(cx - rx * .95, creamMidY);
+        context.bezierCurveTo(cx - rx * .95, creamTopY, cx + rx * .95, creamTopY, cx + rx * .95, creamMidY);
+        // 右边波浪下垂
+        context.bezierCurveTo(cx + rx * .98, creamMidY + ry * .3, cx + rx * .85, creamMidY + ry * .25, cx + rx * .82, creamBottomY - 4);
+        context.bezierCurveTo(cx + rx * .78, creamBottomY + 8, cx + rx * .7, creamBottomY - 4, cx + rx * .66, creamMidY + ry * .28);
+        context.bezierCurveTo(cx + rx * .6, creamMidY + ry * .4, cx + rx * .52, creamBottomY + 6, cx + rx * .46, creamMidY + ry * .3);
+        context.bezierCurveTo(cx + rx * .4, creamMidY + ry * .42, cx + rx * .34, creamBottomY + 10, cx + rx * .28, creamMidY + ry * .32);
+        context.bezierCurveTo(cx + rx * .2, creamMidY + ry * .4, cx + rx * .14, creamBottomY + 5, cx + rx * .08, creamMidY + ry * .28);
+        // 底部
+        context.bezierCurveTo(cx - rx * .08, creamMidY + ry * .4, cx - rx * .18, creamBottomY + 8, cx - rx * .26, creamMidY + ry * .3);
+        context.bezierCurveTo(cx - rx * .34, creamMidY + ry * .4, cx - rx * .4, creamBottomY + 4, cx - rx * .48, creamMidY + ry * .32);
+        context.bezierCurveTo(cx - rx * .56, creamMidY + ry * .4, cx - rx * .62, creamBottomY + 8, cx - rx * .7, creamMidY + ry * .28);
+        context.bezierCurveTo(cx - rx * .76, creamMidY + ry * .38, cx - rx * .82, creamBottomY - 2, cx - rx * .88, creamMidY + ry * .3);
+        // 左边
+        context.bezierCurveTo(cx - rx * .94, creamMidY + ry * .25, cx - rx * .98, creamMidY + ry * .3, cx - rx * .95, creamMidY);
+        context.closePath();
+        context.fillStyle = creamGradient;
+        context.fill();
+        context.restore();
+
+        // 奶油顶部的小装饰
+        context.save();
+        context.beginPath();
+        context.ellipse(cx, cy, rx * .98, ry * .96, 0, 0, Math.PI * 2);
+        context.clip();
+        var topStars = [
+          { x: -.5, y: -.2, s: 4 }, { x: .3, y: -.35, s: 5 }, { x: .6, y: .1, s: 4 },
+          { x: -.2, y: .25, s: 4 }
+        ];
+        for (var ti = 0; ti < topStars.length; ti += 1) {
+          var ts = topStars[ti];
+          drawHeroDoodleStar(context, cx + ts.x * rx, cy + ts.y * ry, ts.s, "#ffd166", ti * .5, .85);
+        }
+        var topDots = [
+          { x: -.7, y: .1, c: "#66d9ff" }, { x: .7, y: -.15, c: "#ff9fd6" },
+          { x: .1, y: -.45, c: "#ffb366" }, { x: -.4, y: -.35, c: "#ffd166" }
+        ];
+        for (var tdi = 0; tdi < topDots.length; tdi += 1) {
+          var td = topDots[tdi];
+          context.fillStyle = td.c;
+          context.globalAlpha = .7;
+          context.beginPath();
+          context.arc(cx + td.x * rx, cy + td.y * ry, 2, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+
+        // 蛋糕底部阴影
+        context.save();
+        var bottomShadow = context.createRadialGradient(cx, bodyTop + bodyHeight, 2, cx, bodyTop + bodyHeight, rx * .8);
+        bottomShadow.addColorStop(0, "rgba(0, 0, 0, .4)");
+        bottomShadow.addColorStop(1, "rgba(0, 0, 0, 0)");
+        context.fillStyle = bottomShadow;
+        context.beginPath();
+        context.ellipse(cx, bodyTop + bodyHeight, rx * .8, 8, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+      function drawHeroSingleCandle(context, x, baseY, candleHeight, time) {
+        var candleWidth = Math.max(3, candleHeight * .038);
+        var candleTop = baseY - candleHeight;
+        var flameHeight = Math.max(22, candleHeight * .56);
+        var flameWidth = Math.max(7, candleWidth * 1.55);
+        var candleGradient = context.createLinearGradient(x - candleWidth, 0, x + candleWidth, 0);
+        candleGradient.addColorStop(0, "#d480c0");
+        candleGradient.addColorStop(.28, "#fff0f8");
+        candleGradient.addColorStop(.58, "#e89fd8");
+        candleGradient.addColorStop(1, "#a85898");
+
+        context.save();
+        var flameGlow = context.createRadialGradient(x, candleTop - flameHeight * .42, 2, x, candleTop - flameHeight * .42, flameHeight * 1.7);
+        flameGlow.addColorStop(0, "rgba(255, 245, 178, .52)");
+        flameGlow.addColorStop(.42, "rgba(255, 190, 70, .18)");
+        flameGlow.addColorStop(1, "rgba(255, 120, 42, 0)");
+        context.globalCompositeOperation = "lighter";
+        context.fillStyle = flameGlow;
+        context.beginPath();
+        context.arc(x, candleTop - flameHeight * .38, flameHeight * 1.5, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        context.save();
+        context.beginPath();
+        context.moveTo(x - candleWidth, baseY);
+        context.lineTo(x - candleWidth * .98, candleTop + 4);
+        context.quadraticCurveTo(x, candleTop - 2, x + candleWidth * .98, candleTop + 4);
+        context.lineTo(x + candleWidth, baseY);
+        context.closePath();
+        context.fillStyle = candleGradient;
+        context.fill();
+        context.strokeStyle = "rgba(255, 255, 255, .82)";
+        context.lineWidth = 1.1;
+        context.stroke();
+        context.save();
+        context.clip();
+        context.strokeStyle = "#ff9fcf";
+        context.globalAlpha = .8;
+        context.lineWidth = Math.max(2, candleWidth * .3);
+        context.beginPath();
+        context.moveTo(x - candleWidth * 1.2, baseY + 2);
+        context.lineTo(x + candleWidth * .75, candleTop - 2);
+        context.stroke();
+        context.restore();
+        context.restore();
+
+        context.save();
+        context.strokeStyle = "#fff2c4";
+        context.lineWidth = 1.1;
+        context.lineCap = "round";
+        context.beginPath();
+        context.moveTo(x, candleTop + 2);
+        context.lineTo(x + Math.sin(time * 2.2) * .8, candleTop - 5);
+        context.stroke();
+        context.fillStyle = "#ffb84d";
+        context.shadowColor = "#ffb84d";
+        context.shadowBlur = 18;
+        context.beginPath();
+        context.moveTo(x, candleTop - 5);
+        context.bezierCurveTo(x - flameWidth, candleTop - flameHeight * .34, x - flameWidth * .55, candleTop - flameHeight * .78, x, candleTop - flameHeight);
+        context.bezierCurveTo(x + flameWidth * .82, candleTop - flameHeight * .72, x + flameWidth * .86, candleTop - flameHeight * .25, x, candleTop - 5);
+        context.fill();
+        context.fillStyle = "#fff8c2";
+        context.shadowBlur = 7;
+        context.beginPath();
+        context.ellipse(x - candleWidth * .08, candleTop - flameHeight * .42, candleWidth * .55, flameHeight * .22, -.12, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+      function drawHeroHappyBirthday(context, width, height, time) {
+        context.save();
+        context.globalAlpha = .64 + Math.sin(time * 1.2) * .08;
+        context.fillStyle = "#ffffff";
+        context.shadowColor = "#ffffff";
+        context.shadowBlur = 5;
+        context.font = "12px Georgia, serif";
+        context.textAlign = "right";
+        context.textBaseline = "alphabetic";
+        context.fillText("happy birthday", width - 22, height - 96);
+        context.restore();
+      }
+      function drawHeroCake(context, cx, topY, width, height, time) {
+        var ry = Math.max(22, width * .135);
+        drawHeroSingleCake(context, cx, topY, width, height, time);
+        drawHeroSingleCandle(context, cx, topY - ry * .2, Math.max(38, height * .44), time);
+      }
+      function renderCakeHero() {
+        var context = cakeHeroContext;
+        var time = Date.now() / 1000;
+        var width = cakeHeroState.width;
+        var height = cakeHeroState.height;
+        var isMobile = width < 640;
+        var cx = width / 2 + cakeHeroState.pointerX * width * (isMobile ? .02 : .03);
+        var cakeWidth = Math.min(width * (isMobile ? .7 : .42), 560);
+        var cakeHeight = Math.min(height * (isMobile ? .4 : .42), 380);
+        var topY = height * (isMobile ? .42 : .4) + cakeHeroState.pointerY * (isMobile ? 4 : 8);
+        if (!cakeHeroState.running) { return; }
+        context.clearRect(0, 0, width, height);
+        // 只画粒子叠加，不画背景和蛋糕（蛋糕用照片）
+        drawHeroWatercolorBokeh(context, cx, topY + cakeHeight * .46, cakeWidth, cakeHeight, time);
+        cakeHeroState.particles.forEach(function (particle, particleIndex) {
+          var particleAngle = particle.x * Math.PI * 2 + time * particle.speed * .08;
+          var particleRadius = cakeWidth * (.7 + particle.z * .9);
+          var particleX = cx + Math.cos(particleAngle) * particleRadius + Math.sin(time * particle.speed + particle.phase) * 8;
+          var particleY = topY + cakeHeight * .46 + Math.sin(particleAngle) * Math.max(cakeWidth * (.25 + particle.z * .12), cakeHeight * .52) + (particle.y - .5) * cakeHeight * .55;
+          var particleAlpha = .2 + particle.z * .38 + Math.sin(time * particle.speed + particle.phase) * .12;
+          var particleColor = particleIndex % 5 === 0 ? "#ffffff" : "hsl(" + particle.hue + ", 100%, 82%)";
+          drawHeroSpark(context, particleX, particleY, particle.size * (.5 + particle.z * .55), particleColor, Math.max(.08, particleAlpha));
+        });
+        cakeHeroState.frame = requestAnimationFrame(renderCakeHero);
+      }
+      function startCakeHero() {
+        resizeCakeHero();
+        cancelAnimationFrame(cakeHeroState.frame);
+        cakeHeroState.running = true;
+        renderCakeHero();
+      }
+      var cakeSceneElement = document.querySelector(".cake-scene");
+      var cakeScreenElement = document.getElementById("cakeScreen");
+      function updateCakeParallax(clientX, clientY) {
+        var rect = cakeScreenElement.getBoundingClientRect();
+        var x = (clientX - rect.left) / rect.width - .5;
+        var y = (clientY - rect.top) / rect.height - .5;
+        cakeHeroState.pointerX = x;
+        cakeHeroState.pointerY = y;
+        cakeSceneElement.style.setProperty("--tilt-x", (x * 8).toFixed(2) + "deg");
+        cakeSceneElement.style.setProperty("--tilt-y", (y * -6).toFixed(2) + "deg");
+        // 蛋糕图片3D跟随
+        var cakePhoto = document.querySelector(".cake-photo");
+        if (cakePhoto) {
+          cakePhoto.style.setProperty("--tilt-x", (y * -12).toFixed(2) + "deg");
+          cakePhoto.style.setProperty("--tilt-y", (x * 16).toFixed(2) + "deg");
+        }
+      }
+      cakeScreenElement.addEventListener("pointermove", function (event) {
+        updateCakeParallax(event.clientX, event.clientY);
+      });
+      cakeScreenElement.addEventListener("pointerleave", function () {
+        cakeSceneElement.style.setProperty("--tilt-x", "0deg");
+        cakeSceneElement.style.setProperty("--tilt-y", "0deg");
+      });
+      cakeScreenElement.addEventListener("touchmove", function (event) {
+        if (event.touches[0]) {
+          updateCakeParallax(event.touches[0].clientX, event.touches[0].clientY);
+        }
+      }, { passive: true });
+      var fireworkCanvas = document.getElementById("fireworkCanvas");
+      var fireworkContext = fireworkCanvas.getContext("2d");
+      var fireworkState = { width: 0, height: 0, dpr: 1, running: false, frame: 0, rockets: [], sparks: [] };
+      function resizeFireworkCanvas() { resizeCanvas(fireworkCanvas, fireworkContext, fireworkState); }
+      function createRocket(x, y) {
+        return { x: x || fireworkState.width * (.2 + Math.random() * .6), y: fireworkState.height + 20,
+          targetY: y || fireworkState.height * (.22 + Math.random() * .34), speed: 5 + Math.random() * 2.5,
+          hue: Math.floor(Math.random() * 360) };
+      }
+      function burstRocket(rocket) {
+        var count = 58 + Math.floor(Math.random() * 38);
+        for (var index = 0; index < count; index += 1) {
+          var angle = (Math.PI * 2 * index) / count + (Math.random() - .5) * .2;
+          var speed = 1.5 + Math.random() * 4.4;
+          fireworkState.sparks.push({ x: rocket.x, y: rocket.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+            life: 1, decay: .008 + Math.random() * .012, size: 1 + Math.random() * 2.2, hue: rocket.hue + (Math.random() - .5) * 36 });
+        }
+      }
+      function renderFireworks() {
+        if (!fireworkState.running) { return; }
+        fireworkContext.fillStyle = "rgba(6, 9, 24, .18)";
+        fireworkContext.fillRect(0, 0, fireworkState.width, fireworkState.height);
+        if (Math.random() < .035) { fireworkState.rockets.push(createRocket()); }
+        fireworkState.rockets.forEach(function (rocket, index) {
+          rocket.y -= rocket.speed;
+          fireworkContext.beginPath();
+          fireworkContext.strokeStyle = "hsla(" + rocket.hue + ", 100%, 72%, .7)";
+          fireworkContext.lineWidth = 2;
+          fireworkContext.moveTo(rocket.x, rocket.y);
+          fireworkContext.lineTo(rocket.x, rocket.y + 14);
+          fireworkContext.stroke();
+          if (rocket.y <= rocket.targetY) { burstRocket(rocket); fireworkState.rockets.splice(index, 1); }
+        });
+        fireworkState.sparks.forEach(function (spark, index) {
+          spark.x += spark.vx; spark.y += spark.vy; spark.vy += .025; spark.vx *= .992; spark.vy *= .992; spark.life -= spark.decay;
+          fireworkContext.beginPath();
+          fireworkContext.fillStyle = "hsla(" + spark.hue + ", 100%, 70%, " + Math.max(0, spark.life) + ")";
+          fireworkContext.arc(spark.x, spark.y, spark.size, 0, Math.PI * 2);
+          fireworkContext.fill();
+          if (spark.life <= 0) { fireworkState.sparks.splice(index, 1); }
+        });
+        fireworkState.frame = requestAnimationFrame(renderFireworks);
+      }
+      function startFireworks() {
+        cancelAnimationFrame(fireworkState.frame);
+        fireworkState.running = true;
+        fireworkState.rockets = [];
+        fireworkState.sparks = [];
+        fireworkContext.clearRect(0, 0, fireworkState.width, fireworkState.height);
+        fireworkState.rockets.push(createRocket(fireworkState.width * .38, fireworkState.height * .28));
+        fireworkState.rockets.push(createRocket(fireworkState.width * .63, fireworkState.height * .38));
+        renderFireworks();
+      }
+
+      var music = {
+        audio: null, playing: false,
+        start: function () {
+          if (!this.audio) {
+            this.audio = new Audio("bgm.mp3");
+            this.audio.loop = true;
+            this.audio.volume = 0.5;
+          }
+          this.audio.play().then(function(){}).catch(function(){});
+          this.playing = true; updateMusicButtons();
+        },
+        stop: function () {
+          if (this.audio) { this.audio.pause(); }
+          this.playing = false; updateMusicButtons();
+        },
+        toggle: function () { if (this.playing) { this.stop(); } else { this.start(); } }
+      };
+      function updateMusicButtons() {
+        document.querySelectorAll(".music-button").forEach(function (button) {
+          button.querySelector("span:last-child").textContent = music.playing ? "暂停" : "音乐";
+          button.querySelector("span:first-child").textContent = music.playing ? "Ⅱ" : "♫";
+        });
+      }
+      function goToCake() {
+        clearTimeout(particleTimer);
+        particleState.running = false;
+        cancelAnimationFrame(particleState.frame);
+        showScreen("cake");
+        if (cakeVideo) {
+          cakeVideo.currentTime = 0;
+          var playPromise = cakeVideo.play();
+          if (playPromise && typeof playPromise.catch === "function") { playPromise.catch(function () {}); }
+        }
+        cancelAnimationFrame(cakeStarsState.frame);
+        cakeStarsState.running = false;
+        startCakeHero();
+      }
+      function goToFireworks() {
+        showScreen("firework");
+        resizeFireworkCanvas();
+        startFireworks();
+      }
+
+      // 相册轮播
+      var albumPhotos = [
+        { src: "img/photo1.jpg", caption: "花一样的你" },
+        { src: "img/photo2.jpg", caption: "古风小仙女" },
+        { src: "img/photo3.jpg", caption: "笑起来真好看" },
+        { src: "img/photo4.jpg", caption: "可爱比耶" },
+        { src: "img/photo5.jpg", caption: "温柔瞬间" },
+        { src: "img/photo6.png", caption: "亮晶晶" },
+        { src: "img/photo7.jpg", caption: "猫咪小喵" }
+      ];
+      var albumIndex = 0;
+      var albumTimer = null;
+      var albumTransitionTimer = null;
+      var albumCard = document.getElementById("albumCard");
+      var albumImg = document.getElementById("albumImg");
+      var albumDots = document.getElementById("albumDots");
+
+      albumPhotos.forEach(function (photo, i) {
+        var preload = new Image();
+        preload.src = photo.src;
+        var dot = document.createElement("button");
+        dot.className = "album-dot" + (i === 0 ? " active" : "");
+        dot.type = "button";
+        dot.setAttribute("aria-label", "查看第 " + (i + 1) + " 张照片");
+        dot.addEventListener("click", function () { goToPhoto(i); });
+        albumDots.appendChild(dot);
+      });
+
+      function normalizeAlbumIndex(i) {
+        return (i + albumPhotos.length) % albumPhotos.length;
+      }
+
+      function goToPhoto(i) {
+        albumIndex = normalizeAlbumIndex(i);
+        clearTimeout(albumTransitionTimer);
+        albumCard.className = "album-card exit";
+        albumTransitionTimer = setTimeout(function () {
+          albumImg.src = albumPhotos[albumIndex].src;
+          albumImg.alt = albumPhotos[albumIndex].caption;
+          albumCard.className = "album-card enter";
+          requestAnimationFrame(function () {
+            albumCard.className = "album-card active";
+          });
+          albumDots.querySelectorAll(".album-dot").forEach(function (d, j) {
+            d.className = "album-dot" + (j === albumIndex ? " active" : "");
+          });
+        }, 400);
+        restartAlbumTimer();
+      }
+
+      function restartAlbumTimer() {
+        clearTimeout(albumTimer);
+        albumTimer = setTimeout(function () {
+          var next = (albumIndex + 1) % albumPhotos.length;
+          goToPhoto(next);
+        }, 3500);
+      }
+
+      function goToAlbum() {
+        clearTimeout(albumTimer);
+        clearTimeout(albumTransitionTimer);
+        showScreen("album");
+        albumIndex = 0;
+        albumImg.src = albumPhotos[0].src;
+        albumImg.alt = albumPhotos[0].caption;
+        albumCard.className = "album-card active";
+        albumDots.querySelectorAll(".album-dot").forEach(function (d, j) {
+          d.className = "album-dot" + (j === 0 ? " active" : "");
+        });
+        restartAlbumTimer();
+      }
+
+      document.getElementById("albumPrevButton").addEventListener("click", function () {
+        goToPhoto(albumIndex - 1);
+      });
+      document.getElementById("albumNextPhotoButton").addEventListener("click", function () {
+        goToPhoto(albumIndex + 1);
+      });
+      document.getElementById("albumNextButton").addEventListener("click", goToFireworks);
+
+      loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (accountInput.value.trim() === "雷俐娜" && passwordInput.value === "1008") {
+          formMessage.textContent = "";
+          showScreen("particle");
+          resizeParticleCanvas();
+          startParticleSequence();
+          music.start();
+          return;
+        }
+        formMessage.textContent = "账号或密码不正确，请再试一次。";
+        passwordInput.focus();
+      });
+      document.querySelectorAll(".music-button").forEach(function (button) { button.addEventListener("click", function () { music.toggle(); }); });
+      document.getElementById("toCakeButton").addEventListener("click", goToCake);
+      document.getElementById("likeButton").addEventListener("click", goToAlbum);
+      document.getElementById("notLikeButton").addEventListener("click", function () {
+        cakeMessage.textContent = "再想想嘛，这个蛋糕可是专门为你准备的。";
+        showToast("愿望先保留，惊喜继续");
+      });
+      document.getElementById("replayButton").addEventListener("click", function () {
+        showScreen("particle");
+        resizeParticleCanvas();
+        startParticleSequence();
+      });
+
+      // 壁纸彩蛋：烟花最后一页 → 引导页 → 23 张背景图逐张全屏浏览
+      var wallpapers = [
+        { src: "img/wallpaper/1.jpg", rot: true },
+        { src: "img/wallpaper/2.jpg", rot: true },
+        { src: "img/wallpaper/3.jpg", rot: true },
+        { src: "img/wallpaper/4.jpg", rot: true },
+        { src: "img/wallpaper/5.jpg", rot: true },
+        { src: "img/wallpaper/6.jpg", rot: true },
+        { src: "img/wallpaper/7.jpg", rot: true },
+        { src: "img/wallpaper/8.jpg", rot: true },
+        { src: "img/wallpaper/9.jpg", rot: true },
+        { src: "img/wallpaper/11.jpg" },
+        { src: "img/wallpaper/12.jpg" },
+        { src: "img/wallpaper/13.jpg" },
+        { src: "img/wallpaper/14.jpg" },
+        { src: "img/wallpaper/15.jpg" },
+        { src: "img/wallpaper/16.jpg" },
+        { src: "img/wallpaper/17.jpg" },
+        { src: "img/wallpaper/19.png" },
+        { src: "img/wallpaper/20.png" },
+        { src: "img/wallpaper/21.png" },
+        { src: "img/wallpaper/22.png" },
+        { src: "img/wallpaper/23.png" },
+        { src: "img/wallpaper/24.png" },
+        { src: "img/wallpaper/18.jpg" }
+      ];
+      var wallpaperStage = document.getElementById("wallpaperStage");
+      var wallpaperIntro = document.getElementById("wallpaperIntro");
+      var wallpaperViewer = document.getElementById("wallpaperViewer");
+      var wallpaperDots = document.getElementById("wallpaperDots");
+      var wallpaperCount = document.getElementById("wallpaperCount");
+      var wallpaperTip = document.getElementById("wallpaperTip");
+      var wallIndex = 0;
+      var wallImages = [];
+      wallpapers.forEach(function (item) {
+        var img = new Image();
+        img.src = item.src;
+        img.alt = "生日壁纸背景图";
+        if (item.rot) { img.className = "rot"; }
+        wallpaperStage.appendChild(img);
+        wallImages.push(img);
+        wallpaperDots.appendChild(document.createElement("i"));
+      });
+      var wallDots = wallpaperDots.querySelectorAll("i");
+      function sizeWallpaperStage() {
+        wallpaperStage.style.setProperty("--wv-w", Math.max(1, wallpaperStage.clientWidth) + "px");
+        wallpaperStage.style.setProperty("--wv-h", Math.max(1, wallpaperStage.clientHeight) + "px");
+        // 竖屏（手机端）时全部图片正常竖版显示；横屏（电脑端）时黑底壁纸旋转铺满
+        screens.wallpaper.classList.toggle("portrait-mode", window.innerHeight > window.innerWidth);
+      }
+      function showWallpaper(index) {
+        wallIndex = (index + wallpapers.length) % wallpapers.length;
+        wallImages.forEach(function (img, i) { img.classList.toggle("on", i === wallIndex); });
+        wallDots.forEach(function (dot, i) { dot.classList.toggle("on", i === wallIndex); });
+        wallpaperCount.textContent = (wallIndex + 1) + " / " + wallpapers.length;
+      }
+      function requestFullscreen() {
+        var target = document.documentElement;
+        var fn = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+        if (!fn) { return; }
+        try { var result = fn.call(target); if (result && typeof result.catch === "function") { result.catch(function () {}); } } catch (e) {}
+      }
+      function exitFullscreen() {
+        if (!(document.fullscreenElement || document.webkitFullscreenElement)) { return; }
+        var fn = document.exitFullscreen || document.webkitExitFullscreen;
+        if (!fn) { return; }
+        try { var result = fn.call(document); if (result && typeof result.catch === "function") { result.catch(function () {}); } } catch (e) {}
+      }
+      function exitWallpaper() {
+        exitFullscreen();
+        wallpaperViewer.classList.remove("show");
+        wallpaperIntro.classList.remove("fade");
+        showScreen("firework");
+        resizeFireworkCanvas();
+        startFireworks();
+      }
+      function openWallpaper() {
+        showScreen("wallpaper");
+        wallpaperIntro.classList.remove("fade");
+        wallpaperViewer.classList.remove("show");
+        wallpaperTip.style.animation = "none";
+        void wallpaperTip.offsetWidth;
+        wallpaperTip.style.animation = "";
+        showWallpaper(0);
+        sizeWallpaperStage();
+      }
+      document.getElementById("toWallpaperButton").addEventListener("click", openWallpaper);
+      document.getElementById("startWallpaperButton").addEventListener("click", function () {
+        wallpaperIntro.classList.add("fade");
+        wallpaperViewer.classList.add("show");
+        wallpaperTip.style.animation = "none";
+        void wallpaperTip.offsetWidth;
+        wallpaperTip.style.animation = "";
+        showWallpaper(0);
+        sizeWallpaperStage();
+        requestFullscreen();
+      });
+      wallpaperViewer.addEventListener("click", function (event) {
+        if (event.target.id === "wallpaperExit") { exitWallpaper(); return; }
+        if (event.target.id === "wallpaperFull") { requestFullscreen(); sizeWallpaperStage(); return; }
+        if (wallIndex === wallpapers.length - 1) {
+          showToast("23 张背景图都给你啦，挑一张美美出片～");
+          exitWallpaper();
+          return;
+        }
+        showWallpaper(wallIndex + 1);
+      });
+      document.addEventListener("keydown", function (event) {
+        if (!screens.wallpaper.classList.contains("active") || !wallpaperViewer.classList.contains("show")) { return; }
+        if (event.key === "ArrowRight" || event.key === " " || event.key === "Spacebar") { event.preventDefault(); showWallpaper(wallIndex + 1); }
+        else if (event.key === "ArrowLeft") { showWallpaper(wallIndex - 1); }
+        else if (event.key === "Escape") { exitWallpaper(); }
+      });
+
+      window.addEventListener("resize", function () {
+        if (screens.particle.classList.contains("active")) { resizeParticleCanvas(); }
+        if (screens.cake.classList.contains("active")) { resizeCakeStars(); }
+        if (screens.cake.classList.contains("active")) { resizeCakeHero(); }
+        if (screens.firework.classList.contains("active")) { resizeFireworkCanvas(); }
+        if (screens.wallpaper.classList.contains("active")) { sizeWallpaperStage(); }
+      });
+      window.addEventListener("orientationchange", function () {
+        setTimeout(function () { if (screens.wallpaper.classList.contains("active")) { sizeWallpaperStage(); } }, 260);
+      });
+      resizeParticleCanvas();
+      resizeCakeStars();
+      resizeCakeHero();
+      resizeFireworkCanvas();
+      updateMusicButtons();
+    }());
+  </script>
+</body>
+</html>
