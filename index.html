@@ -527,8 +527,8 @@
         <div class="wish-text"><p>许个愿望吧</p></div>
         <button class="music-button" type="button" aria-label="播放或暂停音乐"><span>♫</span><span>音乐</span></button>
         <canvas class="cake-stars" id="cakeStarsCanvas" aria-hidden="true"></canvas>
-        <video class="cake-photo cake-video" id="cakeVideo" autoplay loop muted playsinline webkit-playsinline preload="auto" poster="img/cake-cutout.jpg" aria-hidden="true">
-          <source src="cake.mp4" type="video/mp4">
+        <video class="cake-photo cake-video" id="cakeVideo" autoplay loop muted playsinline webkit-playsinline preload="none" poster="img/cake-cutout.jpg" aria-hidden="true">
+          <source data-src="cake.mp4" type="video/mp4">
         </video>
         <canvas class="cake-hero-canvas" id="cakeHeroCanvas" aria-hidden="true"></canvas>
         <div class="cake-nebula"></div>
@@ -793,6 +793,17 @@
       var cakeHeroCanvas = document.getElementById("cakeHeroCanvas");
       var cakeHeroContext = cakeHeroCanvas.getContext("2d");
       var cakeVideo = document.getElementById("cakeVideo");
+      var cakeVideoSource = cakeVideo ? cakeVideo.querySelector("source[data-src]") : null;
+      var cakeVideoLoaded = false;
+      function loadCakeVideo() {
+        if (!cakeVideo || cakeVideoLoaded) { return; }
+        if (cakeVideoSource) {
+          cakeVideoSource.src = cakeVideoSource.getAttribute("data-src");
+          cakeVideoSource.removeAttribute("data-src");
+        }
+        cakeVideo.load();
+        cakeVideoLoaded = true;
+      }
       var cakeHeroState = {
         width: 0, height: 0, dpr: 1, frame: 0, running: false, pointerX: 0, pointerY: 0,
         particles: [], orbitStars: [], cakeTexture: [], planets: [], burst: []
@@ -1872,6 +1883,7 @@
         cancelAnimationFrame(particleState.frame);
         showScreen("cake");
         if (cakeVideo) {
+          loadCakeVideo();
           cakeVideo.currentTime = 0;
           var playPromise = cakeVideo.play();
           if (playPromise && typeof playPromise.catch === "function") { playPromise.catch(function () {}); }
@@ -1904,8 +1916,6 @@
       var albumDots = document.getElementById("albumDots");
 
       albumPhotos.forEach(function (photo, i) {
-        var preload = new Image();
-        preload.src = photo.src;
         var dot = document.createElement("button");
         dot.className = "album-dot" + (i === 0 ? " active" : "");
         dot.type = "button";
@@ -2028,7 +2038,7 @@
       var wallImages = [];
       wallpapers.forEach(function (item) {
         var img = new Image();
-        img.src = item.src;
+        img.setAttribute("data-src", item.src);
         img.alt = "生日壁纸背景图";
         if (item.rot) { img.className = "rot"; }
         wallpaperStage.appendChild(img);
@@ -2036,6 +2046,14 @@
         wallpaperDots.appendChild(document.createElement("i"));
       });
       var wallDots = wallpaperDots.querySelectorAll("i");
+      function loadWallpaperImage(index) {
+        var normalizedIndex = (index + wallpapers.length) % wallpapers.length;
+        var image = wallImages[normalizedIndex];
+        if (image && !image.src) {
+          image.src = image.getAttribute("data-src");
+          image.removeAttribute("data-src");
+        }
+      }
       function sizeWallpaperStage() {
         wallpaperStage.style.setProperty("--wv-w", Math.max(1, wallpaperStage.clientWidth) + "px");
         wallpaperStage.style.setProperty("--wv-h", Math.max(1, wallpaperStage.clientHeight) + "px");
@@ -2044,6 +2062,8 @@
       }
       function showWallpaper(index) {
         wallIndex = (index + wallpapers.length) % wallpapers.length;
+        loadWallpaperImage(wallIndex);
+        loadWallpaperImage(wallIndex + 1);
         wallImages.forEach(function (img, i) { img.classList.toggle("on", i === wallIndex); });
         wallDots.forEach(function (dot, i) { dot.classList.toggle("on", i === wallIndex); });
         wallpaperCount.textContent = (wallIndex + 1) + " / " + wallpapers.length;
